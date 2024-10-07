@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stock Vision - Predict the Future</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f2f5;
+            color: #333;
+            display: flex;
+        }
+
+        .sidebar {
+            width: 250px;
+            height: 100vh;
+            background-color: #0b3954;
+            padding-top: 20px;
+            position: fixed;
+            top: 0;
+            left: 0;
+        }
+
+        .sidebar .button {
+            display: block;
+            width: calc(100% - 40px);
+            margin: 10px 20px;
+            padding: 15px;
+            background-color: #1d4e89;
+            color: #ffffff;
+            border: none;
+            border-radius: 5px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .sidebar .button:hover {
+            background-color: #155479;
+        }
+
+        .container {
+            margin-left: 250px;
+            padding: 10% 5%;
+            text-align: center;
+            width: calc(100% - 250px);
+        }
+
+        .header {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #0b3954;
+        }
+
+        .sub-header {
+            font-size: 1.25rem;
+            color: #1d4e89;
+            margin-top: 10px;
+            margin-bottom: 30px;
+        }
+
+        .search-bar {
+            position: relative;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 15px 20px;
+            border: 1px solid #ccc;
+            border-radius: 50px;
+            outline: none;
+            font-size: 1rem;
+        }
+
+        .search-button {
+            position: absolute;
+            right: 5px;
+            top: 5px;
+            padding: 10px 20px;
+            background-color: #0b3954;
+            border: none;
+            border-radius: 50px;
+            color: #fff;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .search-button:hover {
+            background-color: #1d4e89;
+        }
+
+        .trending-section {
+            margin-top: 50px;
+        }
+
+        .trending-header {
+            font-size: 1.5rem;
+            color: #0b3954;
+            margin-bottom: 20px;
+        }
+
+        .stock-list {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .stock-item {
+            padding: 10px;
+            font-size: 1.1rem;
+            color: #555;
+            margin-bottom: 10px;
+            cursor: pointer;
+        }
+
+        .stock-item:hover {
+            color: #0b3954;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="sidebar">
+        <button class="button">Log Out</button>
+        <button class="button">Profile</button>
+        <button class="button">Request Stock</button>
+        <button class="button">About Us</button>
+    </div>
+
+    <div class="container">
+        <h1 class="header">Stock Vision</h1>
+        <p class="sub-header">See the future of your investments</p>
+
+        <div class="search-bar">
+            <input type="text" class="search-input" placeholder="Search for a stock...">
+            <button class="search-button">Search</button>
+        </div>
+
+        <div class="trending-section">
+            <h2 class="trending-header">Trending Stocks</h2>
+            <ul class="stock-list">
+                <li class="stock-item"><a href="{% url 'stock_detail' symbol='AAPL' %}">AAPL - Apple Inc.</a></li>
+                <li class="stock-item"><a href="{% url 'stock_detail' symbol='TSLA' %}">TSLA - Tesla, Inc.</a></li>
+                <li class="stock-item"><a href="{% url 'stock_detail' symbol='GOOGL' %}">GOOGL - Alphabet Inc.</a></li>
+                <li class="stock-item"><a href="{% url 'stock_detail' symbol='AMZN' %}">AMZN - Amazon.com, Inc.</a></li>
+                <li class="stock-item"><a href="{% url 'stock_detail' symbol='MSFT' %}">MSFT - Microsoft Corporation</a></li>
+            </ul>
+        </div>
+    </div>
+</body>
+
+</html>

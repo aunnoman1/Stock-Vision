@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stock Vision - Stock Details</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            font-size: 2rem;
+            color: #0b3954;
+        }
+
+        .stock-actions {
+            margin: 20px 0;
+        }
+
+        .stock-input {
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            width: 70%;
+            margin-right: 10px;
+        }
+
+        .btn {
+            padding: 10px 15px;
+            background-color: #0b3954;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .btn:hover {
+            background-color: #1d4e89;
+        }
+
+        .prediction-section {
+            margin-top: 30px;
+        }
+
+        .prediction-section h2 {
+            color: #0b3954;
+            font-size: 1.5rem;
+        }
+
+        .prediction-value {
+            font-size: 1.2rem;
+            color: #28a745;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <!-- Stock Name -->
+        <h1>Apple Inc. (AAPL)</h1>
+
+        <!-- Add/Remove from Watchlist Actions -->
+        <div class="stock-actions">
+            <button class="btn">Add to Watchlist</button>
+            <button class="btn" style="background-color: #d9534f;">Remove from Watchlist</button>
+        </div>
+
+        <!-- Price Prediction Section -->
+        <div class="prediction-section">
+            <h2>Price Prediction</h2>
+            <p>The predicted price for <strong>Apple Inc. (AAPL)</strong> is <span class="prediction-value">$155.75</span></p>
+        </div>
+    </div>
+</body>
+
+</html>
