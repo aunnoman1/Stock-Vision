@@ -13,9 +13,12 @@ from sv.models import Stock  # Replace with your app name
 # Alpha Vantage API configuration
 API_KEY = 'Z6KWK2CDX37SX922'
 BASE_URL = 'https://www.alphavantage.co/query'
-STOCK_SYMBOLS = ['NVDA', 'TSLA', 'AAPL', 'META', 'MSFT', 'AMZN', 'AMD', 'AVGO', 'PLTR', 'MSTR', 
-                 'XOM', 'MU', 'JPM', 'GOOG', 'CRM', 'LLY', 'VST', 'HD', 'NFLX', 'UNH', 
-                 'BAC', 'COST', 'SMCI', 'CVX', 'V', 'COIN', 'INTC', 'QCOM', 'CEG', 'ORCL']
+STOCK_SYMBOLS = [
+            'NVDA', 'TSLA', 'AAPL', 'META', 'MSFT', 'AMZN', 'AMD',
+            'AVGO', 'PLTR', 'MSTR', 'XOM', 'MU', 'JPM', 'GOOG',
+            'CRM', 'LLY', 'VST', 'HD', 'NFLX', 'UNH', 'BAC', 
+            'COST', 'SMCI', 'CVX', 'V', 'COIN'
+        ]
 
 # Loop through each stock and populate database
 for symbol in STOCK_SYMBOLS:
