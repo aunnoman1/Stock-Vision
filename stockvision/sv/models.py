@@ -41,12 +41,24 @@ class Stock(models.Model):
 
     def __str__(self):
         return f"{self.name} ({self.ticker})"
+    
+    from django.db import models
+
+    from django.db import models
+from datetime import date
 
 class Price(models.Model):
-    stock = models.ForeignKey(Stock, on_delete=models.CASCADE, related_name="prices")
-    day = models.DateField()
-    time = models.TimeField()
-    value = models.DecimalField(max_digits=10, decimal_places=2)  
+    stock = models.ForeignKey('Stock', on_delete=models.CASCADE, related_name="prices")
+    day = models.DateField()  
+    open_price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    high_price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    low_price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    close_price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+
+    class Meta:
+        unique_together = ('stock', 'day')
+        ordering = ['-day']
 
     def __str__(self):
-        return f"{self.stock.ticker} - {self.day} {self.time} : ${self.value}"
+        return f"{self.stock.ticker} - {self.day}: Open: ${self.open_price}, Close: ${self.close_price}"
+
