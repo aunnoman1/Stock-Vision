@@ -1,10 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stock Vision - Stock Details</title>
+    <title>Stock Vision - {{ stock.name }} Details</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -13,7 +12,6 @@
             margin: 0;
             padding: 0;
         }
-
         .container {
             max-width: 800px;
             margin: 50px auto;
@@ -22,16 +20,13 @@
             border-radius: 10px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
-
         h1 {
             font-size: 2rem;
             color: #0b3954;
         }
-
         .stock-actions {
             margin: 20px 0;
         }
-
         .stock-input {
             padding: 10px;
             border-radius: 5px;
@@ -39,7 +34,6 @@
             width: 70%;
             margin-right: 10px;
         }
-
         .btn {
             padding: 10px 15px;
             background-color: #0b3954;
@@ -48,45 +42,54 @@
             border-radius: 5px;
             cursor: pointer;
         }
-
         .btn:hover {
             background-color: #1d4e89;
         }
-
-        .prediction-section {
+        .prediction-section, .price-section {
             margin-top: 30px;
         }
-
-        .prediction-section h2 {
+        .price-section h2, .prediction-section h2 {
             color: #0b3954;
             font-size: 1.5rem;
         }
-
-        .prediction-value {
+        .price-value, .prediction-value {
             font-size: 1.2rem;
-            color: #28a745;
             font-weight: bold;
+        }
+        .price-value {
+            color: #dc3545;
+        }
+        .prediction-value {
+            color: #28a745;
         }
     </style>
 </head>
-
 <body>
     <div class="container">
-        <!-- Stock Name -->
-        <h1>Apple Inc. (AAPL)</h1>
 
-        <!-- Add/Remove from Watchlist Actions -->
+        <h1>{{ stock.name }} ({{ stock.ticker }})</h1>
+
         <div class="stock-actions">
             <button class="btn">Add to Watchlist</button>
             <button class="btn" style="background-color: #d9534f;">Remove from Watchlist</button>
         </div>
 
-        <!-- Price Prediction Section -->
+        <div class="price-section">
+            <h2>Current Price</h2>
+            {% if latest_price %}
+            <p>The latest price for <strong>{{ stock.name }} ({{ stock.ticker }})</strong> is 
+               <span class="price-value">${{ latest_price.close_price }}</span> (Close Price on {{ latest_price.day }}).</p>
+            {% else %}
+            <p>No price data available for <strong>{{ stock.name }} ({{ stock.ticker }})</strong>.</p>
+            {% endif %}
+        </div>
+
+
         <div class="prediction-section">
             <h2>Price Prediction</h2>
-            <p>The predicted price for <strong>Apple Inc. (AAPL)</strong> is <span class="prediction-value">$155.75</span></p>
+            <p>The predicted price for <strong>{{ stock.name }} ({{ stock.ticker }})</strong> is 
+               <span class="prediction-value">${{ stock.prediction }}</span></p>
         </div>
     </div>
 </body>
-
 </html>
