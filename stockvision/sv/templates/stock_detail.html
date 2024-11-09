@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ stock_data.name }} - Stock Details</title>
+    <link rel="stylesheet" href="{% static 'styles.css' %}">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f2f5;
+            color: #333;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            text-align: center;
+        }
+        .header {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #0b3954;
+        }
+        .current-price {
+            font-size: 1.5rem;
+            color: #0b3954;
+            margin-top: 10px;
+        }
+        .price-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        .price-table th, .price-table td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: center;
+        }
+        .price-table th {
+            background-color: #0b3954;
+            color: white;
+        }
+        .price-table tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="header">{{ stock_data.name }} ({{ stock_data.symbol }})</h1>
+        
+        {% if current_price %}
+            <p class="current-price">Current Price: ${{ current_price }}</p>
+        {% else %}
+            <p class="current-price">Current Price: Not available</p>
+        {% endif %}
+        
+        <p>Predicted Price: ${{ stock_data.predicted_price }}</p>
+
+        <table class="price-table">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Open</th>
+                    <th>High</th>
+                    <th>Low</th>
+                    <th>Close</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for price in stock_prices %}
+                <tr>
+                    <td>{{ price.day }}</td>
+                    <td>${{ price.open_price }}</td>
+                    <td>${{ price.high_price }}</td>
+                    <td>${{ price.low_price }}</td>
+                    <td>${{ price.close_price }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>
