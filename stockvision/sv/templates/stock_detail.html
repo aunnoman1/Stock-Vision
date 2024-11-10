@@ -52,6 +52,9 @@
             background-color: #f2f2f2;
         }
     </style>
+
+    <!-- Load Chart.js from CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.1/chart.min.js"></script>
 </head>
 <body>
     <div class="container">
@@ -66,32 +69,160 @@
         <p>Predicted Price: ${{ stock_data.prediction }}</p>
 
         <div class="price-summary">
-            <p>Highest Price in last 100 days: ${{ max_price }}</p>
-            <p>Lowest Price in last 100 days: ${{ min_price }}</p>
+            <p>Highest Price in last 6 months: ${{ max_price }}</p>
+            <p style="margin-bottom: 50px;">Lowest Price in last 6 months: ${{ min_price }} </p>
         </div>
 
-        <table class="price-table">
-            <thead>
-                <tr>
-                    <th>Date</th>
-                    <th>Open</th>
-                    <th>High</th>
-                    <th>Low</th>
-                    <th>Close</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for price in stock_prices %}
-                <tr>
-                    <td>{{ price.day }}</td>
-                    <td>${{ price.open_price }}</td>
-                    <td>${{ price.high_price }}</td>
-                    <td>${{ price.low_price }}</td>
-                    <td>${{ price.close_price }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+       <!-- Graph Section for Last 6 Months -->
+<!-- Time span selection buttons -->
+<div style="margin-bottom: 20px" id="time-span-buttons" >
+    <button onclick="updateGraph('1w')">1 Week</button>
+    <button onclick="updateGraph('1m')">1 Month</button>
+    <button onclick="updateGraph('3m')">3 Months</button>
+    <button onclick="updateGraph('6m')">6 Months</button>
+</div>
+
+<!-- Move the graph above -->
+<canvas id="priceChart" width="400" height="200"></canvas>
+
+<!-- Show other details -->
+<p>Latest Price: ${{ latest_price.close_price }}</p>
+<p>Max Price in the Last 6 Months: ${{ max_price }}</p>
+</div>
+
+<script>
+// Original chart data
+const chartData = {{ chart_data|safe }};  // Directly use chart_data without JSON.parse
+
+const ctx = document.getElementById('priceChart').getContext('2d');
+
+// Create the initial chart with full data
+let priceChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+        labels: chartData.dates,  // Dates on the x-axis
+        datasets: [
+            {
+                label: 'Open Price',
+                data: chartData.open_prices,
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 2,
+                fill: false,
+            },
+            {
+                label: 'Close Price',
+                data: chartData.close_prices,
+                borderColor: 'rgba(255, 99, 132, 1)',
+                borderWidth: 2,
+                fill: false,
+            },
+            {
+                label: 'High Price',
+                data: chartData.high_prices,
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 2,
+                fill: false,
+            },
+            {
+                label: 'Low Price',
+                data: chartData.low_prices,
+                borderColor: 'rgba(153, 102, 255, 1)',
+                borderWidth: 2,
+                fill: false,
+            }
+        ]
+    },
+    options: {
+        responsive: true,
+        scales: {
+            x: {
+                title: { display: true, text: 'Date' },
+                type: 'category',
+            },
+            y: {
+                title: { display: true, text: 'Price ($)' }
+            }
+        }
+    }
+});
+
+// Function to update the graph based on time span
+function updateGraph(timeSpan) {
+    let filteredData = {
+        dates: [],
+        open_prices: [],
+        close_prices: [],
+        high_prices: [],
+        low_prices: []
+    };
+
+    const currentDate = new Date();
+    let timeLimit;
+
+    // Determine the time limit based on the selected span
+    switch (timeSpan) {
+        case '1w':
+            timeLimit = new Date(currentDate.setDate(currentDate.getDate() - 7)); // 1 week
+            break;
+        case '1m':
+            timeLimit = new Date(currentDate.setMonth(currentDate.getMonth() - 1)); // 1 month
+            break;
+        case '3m':
+            timeLimit = new Date(currentDate.setMonth(currentDate.getMonth() - 3)); // 3 months
+            break;
+        case '6m':
+            timeLimit = new Date(currentDate.setMonth(currentDate.getMonth() - 6)); // 6 months
+            break;
+        default:
+            timeLimit = currentDate;
+    }
+
+    // Filter data based on the time limit
+    for (let i = 0; i < chartData.dates.length; i++) {
+        const date = new Date(chartData.dates[i]);
+        if (date >= timeLimit) {
+            filteredData.dates.push(chartData.dates[i]);
+            filteredData.open_prices.push(chartData.open_prices[i]);
+            filteredData.close_prices.push(chartData.close_prices[i]);
+            filteredData.high_prices.push(chartData.high_prices[i]);
+            filteredData.low_prices.push(chartData.low_prices[i]);
+        }
+    }
+
+    // Update the chart with the filtered data
+    priceChart.data.labels = filteredData.dates;
+    priceChart.data.datasets[0].data = filteredData.open_prices;
+    priceChart.data.datasets[1].data = filteredData.close_prices;
+    priceChart.data.datasets[2].data = filteredData.high_prices;
+    priceChart.data.datasets[3].data = filteredData.low_prices;
+
+    // Redraw the chart
+    priceChart.update();
+}
+</script>
+            <!-- Price Data Table -->
+            <table class="price-table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Open</th>
+                        <th>High</th>
+                        <th>Low</th>
+                        <th>Close</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for price in stock_prices %}
+                    <tr>
+                        <td>{{ price.day }}</td>
+                        <td>${{ price.open_price }}</td>
+                        <td>${{ price.high_price }}</td>
+                        <td>${{ price.low_price }}</td>
+                        <td>${{ price.close_price }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
     </div>
 </body>
 </html>
