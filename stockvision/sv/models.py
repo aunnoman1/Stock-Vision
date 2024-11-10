@@ -41,15 +41,16 @@ class Post(models.Model):
     
 class Price(models.Model):
     stock = models.ForeignKey('Stock', on_delete=models.CASCADE, related_name="prices")
-    day = models.DateField()  
-    open_price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
-    high_price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
-    low_price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
-    close_price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    date = models.DateField()  
+    open = models.DecimalField(max_digits=14, decimal_places=4, default=0.00)
+    high = models.DecimalField(max_digits=14, decimal_places=4, default=0.00)
+    low = models.DecimalField(max_digits=14, decimal_places=4, default=0.00)
+    close = models.DecimalField(max_digits=14, decimal_places=4, default=0.00)
+    volume = models.BigIntegerField(default=0)
 
     class Meta:
-        unique_together = ('stock', 'day')
-        ordering = ['-day']
+        unique_together = ('stock', 'date')
+        ordering = ['-date']
 
     def __str__(self):
         return f"{self.stock.ticker} - {self.day}: Open: ${self.open_price}, Close: ${self.close_price}"
