@@ -8,7 +8,7 @@ class Command(BaseCommand):
     help = 'Fetch stock prices from Alpha Vantage and store them in the database'
 
     def handle(self, *args, **kwargs):
-        api_key = 'P0GACQZ64BSA3V14'
+        api_key = ' U3NSOB8CY8BITP3H' #my api P0GACQZ64BSA3V14 , Z6KWK2CDX37SX922
         base_url = "https://www.alphavantage.co/query"
         
         # Stocks to fetch prices for
@@ -44,7 +44,7 @@ class Command(BaseCommand):
                     continue
 
                 # Get prices for the last 25 days
-                days = list(time_series.keys())[:25]
+                days = list(time_series.keys())[:210]
 
                 # Fetch or create the Stock object
                 stock_obj, created = Stock.objects.get_or_create(ticker=stock)
