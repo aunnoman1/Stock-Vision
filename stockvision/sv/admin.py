@@ -1,7 +1,7 @@
 from django.contrib import admin
-from .models import User, Request, Watchlist, Post, Stock, Price
+from .models import Request, Watchlist, Post, Stock, Price
 
-admin.site.register(User)
+# Register your models here.
 admin.site.register(Request)
 admin.site.register(Watchlist)
 admin.site.register(Post)
