@@ -61,4 +61,3 @@ class Price(models.Model):
 
     def __str__(self):
         return f"{self.stock.ticker} - {self.day}: Open: ${self.open_price}, Close: ${self.close_price}"
-

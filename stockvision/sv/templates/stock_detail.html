@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    {% load static %}
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ stock_data.name }} - Stock Details</title>
@@ -29,6 +30,10 @@
             color: #0b3954;
             margin-top: 10px;
         }
+        .price-summary {
+            margin-top: 20px;
+            font-size: 1.2rem;
+        }
         .price-table {
             width: 100%;
             border-collapse: collapse;
@@ -50,15 +55,20 @@
 </head>
 <body>
     <div class="container">
-        <h1 class="header">{{ stock_data.name }} ({{ stock_data.symbol }})</h1>
+        <h1 class="header">{{ stock_data.name }} ({{ stock_data.ticker }})</h1>
         
-        {% if current_price %}
-            <p class="current-price">Current Price: ${{ current_price }}</p>
+        {% if latest_price %}
+            <p class="current-price">Current Price: ${{ latest_price.close_price }}</p>
         {% else %}
             <p class="current-price">Current Price: Not available</p>
         {% endif %}
         
-        <p>Predicted Price: ${{ stock_data.predicted_price }}</p>
+        <p>Predicted Price: ${{ stock_data.prediction }}</p>
+
+        <div class="price-summary">
+            <p>Highest Price in last 100 days: ${{ max_price }}</p>
+            <p>Lowest Price in last 100 days: ${{ min_price }}</p>
+        </div>
 
         <table class="price-table">
             <thead>
