@@ -8,7 +8,7 @@ class Command(BaseCommand):
     help = 'Fetch stock prices from Alpha Vantage and store them in the database'
 
     def handle(self, *args, **kwargs):
-        api_key = ' U3NSOB8CY8BITP3H' #my api P0GACQZ64BSA3V14 , Z6KWK2CDX37SX922
+        api_key = 'P0GACQZ64BSA3V14' #my api U3NSOB8CY8BITP3H  , Z6KWK2CDX37SX922
         base_url = "https://www.alphavantage.co/query"
         
         # Stocks to fetch prices for
