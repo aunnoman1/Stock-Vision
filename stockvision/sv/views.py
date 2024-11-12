@@ -10,8 +10,8 @@ def homepage_view(request):
 
 def stock_detail(request, symbol):
     stock = get_object_or_404(Stock, ticker=symbol)
-    latest_price = stock.prices.order_by('-day').first()
-    stock_prices = stock.prices.order_by('day')[:100]  # Sort by day in ascending order to start from the earliest
+    latest_price = stock.prices.order_by('-date').first()
+    stock_prices = stock.prices.order_by('date')[:100]  # Sort by day in ascending order to start from the earliest
     
     if stock_prices.exists():
         min_price = min(price.low_price for price in stock_prices)
@@ -22,10 +22,10 @@ def stock_detail(request, symbol):
     # Convert Decimal prices to float and collect data for chart
     chart_data = {
         'dates': [price.day.strftime('%Y-%m-%d') for price in stock_prices],
-        'open_prices': [float(price.open_price) for price in stock_prices],
-        'close_prices': [float(price.close_price) for price in stock_prices],
-        'high_prices': [float(price.high_price) for price in stock_prices],
-        'low_prices': [float(price.low_price) for price in stock_prices],
+        'open_prices': [float(price.open) for price in stock_prices],
+        'close_prices': [float(price.close) for price in stock_prices],
+        'high_prices': [float(price.high) for price in stock_prices],
+        'low_prices': [float(price.low) for price in stock_prices],
     }
 
     return render(request, 'stock_detail.html', {

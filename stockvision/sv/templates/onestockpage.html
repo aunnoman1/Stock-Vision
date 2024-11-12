@@ -78,7 +78,7 @@
             <h2>Current Price</h2>
             {% if latest_price %}
             <p>The latest price for <strong>{{ stock.name }} ({{ stock.ticker }})</strong> is 
-               <span class="price-value">${{ latest_price.close_price }}</span> (Close Price on {{ latest_price.day }}).</p>
+               <span class="price-value">${{ latest_price.close }}</span> (Close Price on {{ latest_price.date }}).</p>
             {% else %}
             <p>No price data available for <strong>{{ stock.name }} ({{ stock.ticker }})</strong>.</p>
             {% endif %}

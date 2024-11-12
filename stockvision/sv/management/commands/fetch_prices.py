@@ -54,10 +54,10 @@ class Command(BaseCommand):
                     
                     try:
                         # Convert string to float safely
-                        open_price = float(price_data.get('1. open', 0))
-                        high_price = float(price_data.get('2. high', 0))
-                        low_price = float(price_data.get('3. low', 0))
-                        close_price = float(price_data.get('4. close', 0))
+                        open = float(price_data.get('1. open', 0))
+                        high = float(price_data.get('2. high', 0))
+                        low = float(price_data.get('3. low', 0))
+                        close = float(price_data.get('4. close', 0))
                         
                         # Convert day string to a date object
                         day_date = datetime.strptime(day, '%Y-%m-%d').date()
@@ -67,10 +67,10 @@ class Command(BaseCommand):
                             stock=stock_obj,
                             day=day_date,
                             defaults={
-                                'open_price': open_price,
-                                'high_price': high_price,
-                                'low_price': low_price,
-                                'close_price': close_price
+                                'open_price': open,
+                                'high_price': high,
+                                'low_price': low,
+                                'close_price': close
                             }
                         )
                         self.stdout.write(self.style.SUCCESS(f'Updated or created price for {stock} on {day_date}'))

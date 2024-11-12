@@ -16,7 +16,7 @@ STOCK_SYMBOLS = [
             'CRM', 'LLY', 'VST', 'HD', 'NFLX', 'UNH', 'BAC', 
             'COST', 'SMCI', 'CVX', 'V', 'COIN'
         ]
-class command(BaseCommand):
+class Command(BaseCommand):
     help = 'Populate the database with stock data such as name, description, and sector'
 
     def handle(self, *args, **kwargs):
