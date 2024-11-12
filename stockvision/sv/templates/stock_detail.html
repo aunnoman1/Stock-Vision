@@ -214,11 +214,11 @@ function updateGraph(timeSpan) {
                 <tbody>
                     {% for price in stock_prices %}
                     <tr>
-                        <td>{{ price.day }}</td>
-                        <td>${{ price.open_price }}</td>
-                        <td>${{ price.high_price }}</td>
-                        <td>${{ price.low_price }}</td>
-                        <td>${{ price.close_price }}</td>
+                        <td>{{ price.date }}</td>
+                        <td>${{ price.open }}</td>
+                        <td>${{ price.high }}</td>
+                        <td>${{ price.low }}</td>
+                        <td>${{ price.close }}</td>
                     </tr>
                     {% endfor %}
                 </tbody>
