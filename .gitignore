@@ -1,4 +1,10 @@
 env/
 **/__pycache__/
+**/*.pyc
+*.py[cod]
 .env
 data/
+*/__pycache__/*
+__pycache__/
+*.py[cod]
+*$py.class

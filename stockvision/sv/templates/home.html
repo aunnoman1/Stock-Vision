@@ -43,6 +43,7 @@
             font-size: 1rem;
             cursor: pointer;
             transition: background-color 0.3s;
+            text-decoration: none;
         }
 
         .sidebar .button:hover {
@@ -102,7 +103,6 @@
             background-color: #1d4e89;
         }
 
-        /* Autocomplete styles */
         .autocomplete-items {
             position: absolute;
             border: 1px solid #d4d4d4;
@@ -162,10 +162,11 @@
 
 <body>
     <div class="sidebar">
-        <button class="button">Log Out</button>
-        <button class="button">Profile</button>
-        <button class="button">Request Stock</button>
-        <button class="button">About Us</button>
+        <a href="{% url 'userdetails' %}" class="button">Profile</a>
+        <a href="{% url 'userwatchlist' %}" class="button">Watchlist</a>
+        <a class="button">Request Stock</a>
+        <a class="button">About Us</a>
+        <a href="{% url 'logout' %}" class="button">Log Out</a>
     </div>
 
     <div class="container">
@@ -200,7 +201,7 @@
                 .then(response => response.json())
                 .then(data => {
                     var autocompleteList = document.getElementById('autocomplete-list');
-                    autocompleteList.innerHTML = ''; // Clear previous results
+                    autocompleteList.innerHTML = '';
 
                     data.forEach(stock => {
                         var item = document.createElement('div');
