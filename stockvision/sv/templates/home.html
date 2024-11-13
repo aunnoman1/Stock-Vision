@@ -174,10 +174,11 @@
         <p class="sub-header">See the future of your investments</p>
 
         <div class="search-bar">
-            <input type="text" class="search-input" id="stockSearch" placeholder="Search for a stock...">
-            <button class="search-button">Search</button>
+            <form method="GET" action="{% url 'search_stocks' %}" style="display: inline-block; width: 100%;">
+                <input type="text" class="search-input" id="stockSearch" name="query" placeholder="Search for a stock...">
+            </form>
             <div id="autocomplete-list" class="autocomplete-items"></div>
-        </div>
+        </div>        
 
         <div class="trending-section">
             <h2 class="trending-header">Trending Stocks</h2>
