@@ -53,4 +53,4 @@ class Price(models.Model):
         ordering = ['-date']
 
     def __str__(self):
-        return f"{self.stock.ticker} - {self.day}: Open: ${self.open_price}, Close: ${self.close_price}"
+        return f"{self.stock.ticker} - {self.date}: Open: ${self.open}, Close: ${self.close}"
