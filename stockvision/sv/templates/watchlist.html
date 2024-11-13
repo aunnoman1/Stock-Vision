@@ -1,0 +1,78 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Watchlist</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: white;
+            color: #4B0082; /* Purple */
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            background-color: #4B0082;
+            color: white;
+            padding: 10px 0;
+            text-align: center;
+        }
+        .content {
+            padding: 20px;
+        }
+        .watchlist-title {
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+        .stock-list {
+            list-style-type: none;
+            padding: 0;
+        }
+        .stock-item {
+            background-color: #f3f3f3;
+            margin: 5px 0;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .stock-item:hover {
+            background-color: #e0e0e0;
+        }
+        footer {
+            background-color: #4B0082;
+            color: white;
+            text-align: center;
+            padding: 10px 0;
+            position: fixed;
+            width: 100%;
+            bottom: 0;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>User Watchlist</h1>
+    </header>
+
+    <div class="content">
+        <h2 class="watchlist-title">{{ user.username }}'s Watchlist</h2>
+        <ul class="stock-list">
+            {% for stock in watchlist.stocks.all %}
+                <li class="stock-item">
+                    <strong>{{ stock.name }} ({{ stock.ticker }})</strong><br>
+                    Description: {{ stock.description }}<br>
+                    Sector: {{ stock.sector }}<br>
+                    Prediction: ${{ stock.prediction }}
+                </li>
+            {% empty %}
+                <li>No stocks in watchlist.</li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <footer>
+        <p>&copy; 2024 StockVision</p>
+    </footer>
+</body>
+</html>

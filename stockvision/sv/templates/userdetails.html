@@ -1,0 +1,58 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Details</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: white;
+            color: #4B0082; /* Purple */
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            background-color: #4B0082;
+            color: white;
+            padding: 10px 0;
+            text-align: center;
+        }
+        .content {
+            padding: 20px;
+        }
+        .user-details {
+            font-size: 20px;
+            margin-bottom: 20px;
+        }
+        footer {
+            background-color: #4B0082;
+            color: white;
+            text-align: center;
+            padding: 10px 0;
+            position: fixed;
+            width: 100%;
+            bottom: 0;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>User Details</h1>
+    </header>
+
+    <div class="content">
+        <div class="user-details">
+            <h2>Username: {{ user.username }}</h2>
+            <p>Email: {{ user.email }}</p>
+            <p>Number of Watchlists: {{ user.watchlists.count }}</p>
+            <p>Number of Requests: {{ user.requests.count }}</p>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2024 StockVision</p>
+    </footer>
+</body>
+</html>
