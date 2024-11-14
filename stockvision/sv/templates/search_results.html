@@ -1,0 +1,11 @@
+<h1>Search Results for "{{ query }}"</h1>
+{% if stocks %}
+    <p>Multiple results found. Please refine your search or select from the list below:</p>
+    <ul>
+        {% for stock in stocks %}
+            <li><a href="{% url 'stock_detail' stock.ticker %}">{{ stock.name }} ({{ stock.ticker }})</a></li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p>No results found for "{{ query }}".</p>
+{% endif %}
