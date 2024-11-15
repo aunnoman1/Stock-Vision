@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% load static %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Results</title>
+    <link rel="stylesheet" href="{% static 'styles.css' %}">
+</head>
+<body>
+    <div class="container">
+        <h1>Search Results</h1>
+        
+        <!-- Display the search query -->
+        <p>Results for: <strong>{{ query }}</strong></p>
+
+        <!-- Check if any stocks are returned -->
+        {% if stocks %}
+            <ul>
+                <!-- Loop through the stocks and display them as links -->
+                {% for stock in stocks %}
+                    <li>
+                        <a href="{% url 'stock_detail' stock.ticker %}">
+                            {{ stock.name }} ({{ stock.ticker }})
+                        </a>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <!-- Message when no results are found -->
+            <p>No stocks found for your search.</p>
+        {% endif %}
+        
+        <!-- Add a button to return to the home page -->
+        <a href="{% url 'homepage' %}" class="btn">Home</a>
+    </div>
+</body>
+</html>
