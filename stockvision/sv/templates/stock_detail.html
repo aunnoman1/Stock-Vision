@@ -85,122 +85,81 @@
         <div id="candlestick-chart" style="height: 600px;"></div>
         <script src="https://cdn.jsdelivr.net/npm/plotly.js-dist@2.16.1/plotly.min.js"></script>
         <script>
-        const defaultTimeSpan = '6m';  
-        // Define the initial chart data (directly from template context)
-        const chartData = {
-            dates: {{ chart_data.dates|safe }},
-            close_prices: {{ chart_data.close_prices|safe }},
-            open_prices: {{ chart_data.open_prices|safe }},
-            high_prices: {{ chart_data.high_prices|safe }},
-            low_prices: {{ chart_data.low_prices|safe }}
-        };
-
-        // Function to filter out weekends (Saturday=5, Sunday=6)
-        function filterWeekends(data) {
-            const filteredData = {
-                dates: [],
-                close_prices: [],
-                open_prices: [],
-                high_prices: [],
-                low_prices: []
+            // Define the initial chart data (directly from template context)
+            const chartData = {
+                dates: {{ chart_data.dates|safe }},
+                close_prices: {{ chart_data.close_prices|safe }},
+                open_prices: {{ chart_data.open_prices|safe }},
+                high_prices: {{ chart_data.high_prices|safe }},
+                low_prices: {{ chart_data.low_prices|safe }}
             };
-        
-            for (let i = 0; i < data.dates.length; i++) {
-                const date = new Date(data.dates[i]);
-                // Only add dates that fall on weekdays (Monday=1 through Friday=5)
-                if (date.getDay() >= 1 && date.getDay() <= 5) {
-                    filteredData.dates.push(data.dates[i]);
-                    filteredData.close_prices.push(data.close_prices[i]);
-                    filteredData.open_prices.push(data.open_prices[i]);
-                    filteredData.high_prices.push(data.high_prices[i]);
-                    filteredData.low_prices.push(data.low_prices[i]);
+
+            // Create the initial candlestick chart
+            function plotChart(data) {
+                const trace = {
+                    x: data.dates,
+                    close: data.close_prices,
+                    open: data.open_prices,
+                    high: data.high_prices,
+                    low: data.low_prices,
+                    type: 'candlestick',
+                    name: 'Candlestick Data',
+                    increasing: { line: { color: 'green' } },
+                    decreasing: { line: { color: 'red' } }
+                };
+
+                const layout = {
+                    title: '{{ stock_data.name }} Stock Price',
+                    xaxis: { title: 'Date', rangeslider: { visible: false } },
+                    yaxis: { title: 'Price' }
+                };
+
+                Plotly.newPlot('candlestick-chart', [trace], layout);
+            }
+
+            // Initial chart render
+            plotChart(chartData);
+
+            // Update chart based on selected time span
+            function updateGraph(timeSpan) {
+                // You can replace the following with actual logic to filter data by the timeSpan
+                // Here, we are just displaying the full 6-month data for simplicity
+                let updatedData;
+
+                if (timeSpan === '1w') {
+                    // Example: Filter chartData to the last week
+                    updatedData = {
+                        dates: chartData.dates.slice(-7), // last 7 days
+                        close_prices: chartData.close_prices.slice(-7),
+                        open_prices: chartData.open_prices.slice(-7),
+                        high_prices: chartData.high_prices.slice(-7),
+                        low_prices: chartData.low_prices.slice(-7)
+                    };
+                } else if (timeSpan === '1m') {
+                    updatedData = {
+                        dates: chartData.dates.slice(-30), // last 30 days
+                        close_prices: chartData.close_prices.slice(-30),
+                        open_prices: chartData.open_prices.slice(-30),
+                        high_prices: chartData.high_prices.slice(-30),
+                        low_prices: chartData.low_prices.slice(-30)
+                    };
+                } else if (timeSpan === '3m') {
+                    updatedData = {
+                        dates: chartData.dates.slice(-90), // last 90 days
+                        close_prices: chartData.close_prices.slice(-90),
+                        open_prices: chartData.open_prices.slice(-90),
+                        high_prices: chartData.high_prices.slice(-90),
+                        low_prices: chartData.low_prices.slice(-90)
+                    };
+                } else if (timeSpan === '6m') {
+                    updatedData = chartData; // full 6 months data
                 }
+
+                // Re-render the chart with updated data
+                plotChart(updatedData);
             }
+        </script>
         
-            return filteredData;
-        }        
-
-        // Function to plot the chart
-        function plotChart(data, timeSpan) {
-            const trace = {
-                x: data.dates,
-                close: data.close_prices,
-                open: data.open_prices,
-                high: data.high_prices,
-                low: data.low_prices,
-                type: 'candlestick',
-                name: 'Candlestick Data',
-                increasing: { line: { color: 'green' } },
-                decreasing: { line: { color: 'red' } }
-            };
-        
-            // Determine the interval based on the selected time span
-            let tickInterval;
-            let tickFormat;
-        
-            if (timeSpan === '1w') {
-                tickInterval = 1; 
-                tickFormat = "%b %d, %Y"; 
-            } else if (timeSpan === '1m') {
-                tickInterval = 5; 
-                tickFormat = "%b %d, %Y"; 
-            } else if (timeSpan === '3m') {
-                tickInterval = 10 ; 
-                tickFormat = "%b %d, %Y"; 
-            } else if (timeSpan === '6m') {
-                tickInterval = Math.ceil(data.dates.length / 6); 
-                tickFormat = "%b %Y";
-            }
-        
-            const layout = {
-                title: '{{ stock_data.name }} Stock Price',
-                xaxis: {
-                    title: 'Date',
-                    rangeslider: { visible: false },
-                    type: 'category', 
-                    tickmode: 'linear', 
-                    tick0: 0, // Start at the first date
-                    dtick: tickInterval, 
-                    tickformat: tickFormat 
-                },
-                yaxis: { title: 'Price' }
-            };
-        
-            Plotly.newPlot('candlestick-chart', [trace], layout);
-        }        
-        const filteredChartData = filterWeekends(chartData);
-        plotChart(filteredChartData, defaultTimeSpan);
-
-       // Update chart based on selected time span
-function updateGraph(timeSpan) {
-    let days;
-
-    // Define the number of trading days based on the selected time span
-    if (timeSpan === '1w') {
-        days = 5; 
-    } else if (timeSpan === '1m') {
-        days = 22; 
-    } else if (timeSpan === '3m') {
-        days = 65; 
-    } else if (timeSpan === '6m') {
-        days = 130;
-    }
-
-    const recentData = {
-        dates: chartData.dates.slice(-days),
-        close_prices: chartData.close_prices.slice(-days),
-        open_prices: chartData.open_prices.slice(-days),
-        high_prices: chartData.high_prices.slice(-days),
-        low_prices: chartData.low_prices.slice(-days)
-    };
-    const filteredData = filterWeekends(recentData);
-
-    plotChart(filteredData, timeSpan);
-}             
-
-        </script>             
-        
-        <!-- Price Data Table -->
         <table class="price-table">
             <thead>
                 <tr>
@@ -214,7 +173,7 @@ function updateGraph(timeSpan) {
             <tbody>
                 {% for price in stock_prices %}
                 <tr>
-                    <td>{{ price.date }}</td>
+                    <td>{{ price.date|date:"F j, Y" }}</td>
                     <td>${{ price.open }}</td>
                     <td>${{ price.high }}</td>
                     <td>${{ price.low }}</td>
@@ -223,6 +182,7 @@ function updateGraph(timeSpan) {
                 {% endfor %}
             </tbody>
         </table>
+        
     </div>
 </body>
 </html>
