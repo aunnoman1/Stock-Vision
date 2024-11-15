@@ -8,6 +8,8 @@ from django.contrib.auth import authenticate, login
 from django.contrib import messages
 from django.shortcuts import  redirect
 from django.contrib.auth import logout
+from datetime import timedelta
+from django.utils import timezone
 
 
 def homepage_view(request):
@@ -16,14 +18,27 @@ def homepage_view(request):
 def stock_detail(request, symbol):
     stock = get_object_or_404(Stock, ticker=symbol)
     latest_price = stock.prices.order_by('-date').first()
-    stock_prices = stock.prices.order_by('date')[:100]  
+    
+    time_span = request.GET.get('time_span', '6m')
+
+    if time_span == '1w':
+        start_date = timezone.now() - timedelta(days=7)
+    elif time_span == '1m':
+        start_date = timezone.now() - timedelta(days=30)
+    elif time_span == '3m':
+        start_date = timezone.now() - timedelta(days=90)
+    elif time_span == '6m':
+        start_date = timezone.now() - timedelta(days=180)
+    else:
+        start_date = timezone.now() - timedelta(days=180)
+
+    stock_prices = stock.prices.filter(date__gte=start_date).order_by('date')
 
     if stock_prices.exists():
         min_price = min(price.low for price in stock_prices)
         max_price = max(price.high for price in stock_prices)
     else:
         min_price = max_price = None
-
 
     chart_data = {
         'dates': [price.date.strftime('%Y-%m-%d') for price in stock_prices],
@@ -40,6 +55,7 @@ def stock_detail(request, symbol):
         'min_price': min_price,
         'max_price': max_price,
         'chart_data': chart_data,
+        'time_span': time_span,  
     })
 
 def search_stocks(request):
@@ -51,7 +67,6 @@ def search_stocks(request):
         results = []
     
     return JsonResponse(results, safe=False)
-
 
 def userwatchlist(request):
     watchlist = Watchlist.objects.filter(user=request.user).first()
