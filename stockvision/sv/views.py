@@ -8,8 +8,10 @@ from django.contrib.auth import authenticate, login
 from django.contrib import messages
 from django.shortcuts import  redirect
 from django.contrib.auth import logout
-from datetime import timedelta
 from django.utils import timezone
+from datetime import timedelta
+from .models import Stock 
+
 
 
 def homepage_view(request):
@@ -56,17 +58,20 @@ def stock_detail(request, symbol):
         'max_price': max_price,
         'chart_data': chart_data,
         'time_span': time_span,  
-    })
+    }) 
 
 def search_stocks(request):
-    query = request.GET.get('q', '')
-    if query:
-        stocks = Stock.objects.filter(name__icontains=query)[:100]
-        results = [{'name': stock.name, 'ticker': stock.ticker} for stock in stocks]
-    else:
-        results = []
-    
-    return JsonResponse(results, safe=False)
+    query = request.GET.get('query', '')  
+    stocks = Stock.objects.filter(name__icontains=query)[:100] if query else []
+
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        suggestions = [{'name': stock.name, 'ticker': stock.ticker} for stock in stocks]
+        return JsonResponse(suggestions, safe=False)
+
+    return render(request, 'search_results.html', {
+        'query': query,
+        'stocks': stocks,
+    })
 
 def userwatchlist(request):
     watchlist = Watchlist.objects.filter(user=request.user).first()

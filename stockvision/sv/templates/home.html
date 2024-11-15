@@ -112,6 +112,7 @@
             top: 100%;
             left: 0;
             right: 0;
+            background-color: #fff;
         }
 
         .autocomplete-items div {
@@ -175,9 +176,10 @@
         <div class="search-bar">
             <form method="GET" action="{% url 'search_stocks' %}" style="display: inline-block; width: 100%;">
                 <input type="text" class="search-input" id="stockSearch" name="query" placeholder="Search for a stock...">
+                <button type="submit" class="search-button">Search</button>
             </form>
             <div id="autocomplete-list" class="autocomplete-items"></div>
-        </div>        
+        </div>
 
         <div class="trending-section">
             <h2 class="trending-header">Trending Stocks</h2>
@@ -193,23 +195,35 @@
 
     <script>
         document.getElementById('stockSearch').addEventListener('input', function () {
-            var query = this.value;
+            const query = this.value;
 
             if (query.length > 0) {
-                fetch(`/search_stocks/?q=` + query)
+                fetch(`/search_stocks/?query=${encodeURIComponent(query)}`, {
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                })
                 .then(response => response.json())
                 .then(data => {
-                    var autocompleteList = document.getElementById('autocomplete-list');
+                    const autocompleteList = document.getElementById('autocomplete-list');
                     autocompleteList.innerHTML = ''; // Clear previous results
 
-                    data.forEach(stock => {
-                        var item = document.createElement('div');
-                        item.innerHTML = stock.name;
-                        item.addEventListener('click', function() {
-                            window.location.href = `/stock/${stock.ticker}/`;
+                    if (data.length === 0) {
+                        const noResultItem = document.createElement('div');
+                        noResultItem.innerHTML = "No results found.";
+                        autocompleteList.appendChild(noResultItem);
+                    } else {
+                        data.forEach(stock => {
+                            const item = document.createElement('div');
+                            item.className = "autocomplete-item";
+                            item.innerHTML = `${stock.name} (${stock.ticker})`;
+                            item.addEventListener('click', function () {
+                                window.location.href = `/stock/${stock.ticker}/`;
+                            });
+                            autocompleteList.appendChild(item);
                         });
-                        autocompleteList.appendChild(item);
-                    });
+                    }
+                })
+                .catch(error => {
+                    console.error("Error fetching autocomplete suggestions:", error);
                 });
             } else {
                 document.getElementById('autocomplete-list').innerHTML = '';
