@@ -2,7 +2,7 @@ import json
 import requests
 from datetime import datetime
 import nltk
-from stock_app.models import Post, Stock
+from sv.models import Post, Stock
 from django.core.management.base import BaseCommand
 
 nltk.download('vader_lexicon')

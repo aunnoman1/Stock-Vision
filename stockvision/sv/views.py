@@ -11,8 +11,7 @@ from django.contrib.auth import logout
 from django.utils import timezone
 from datetime import timedelta
 from .models import Stock 
-
-
+from django.db.models import Q
 
 def homepage_view(request):
     return render(request, 'home.html')
@@ -21,6 +20,7 @@ def stock_detail(request, symbol):
     stock = get_object_or_404(Stock, ticker=symbol)
     latest_price = stock.prices.order_by('-date').first()
     
+    # Handle time span for price data
     time_span = request.GET.get('time_span', '6m')
 
     if time_span == '1w':
@@ -50,6 +50,9 @@ def stock_detail(request, symbol):
         'low_prices': [float(price.low) for price in stock_prices],
     }
 
+    # Retrieve the 5 most recent posts for the stock
+    recent_posts = stock.posts.all().order_by('-time')[:5]
+
     return render(request, 'stock_detail.html', {
         'stock_data': stock,
         'latest_price': latest_price,
@@ -57,17 +60,27 @@ def stock_detail(request, symbol):
         'min_price': min_price,
         'max_price': max_price,
         'chart_data': chart_data,
-        'time_span': time_span,  
-    }) 
+        'time_span': time_span,
+        'recent_posts': recent_posts,  # Include recent posts in the context
+    })
 
 def search_stocks(request):
-    query = request.GET.get('query', '')  
-    stocks = Stock.objects.filter(name__icontains=query)[:100] if query else []
+    query = request.GET.get('query', '')
+    
+    # Check if there's a query, then filter by name or ticker
+    if query:
+        stocks = Stock.objects.filter(
+            Q(name__icontains=query) | Q(ticker__icontains=query)
+        )[:100]
+    else:
+        stocks = []
 
+    # Handle AJAX request for suggestions
     if request.headers.get('x-requested-with') == 'XMLHttpRequest':
         suggestions = [{'name': stock.name, 'ticker': stock.ticker} for stock in stocks]
         return JsonResponse(suggestions, safe=False)
 
+    # Render results for a normal request
     return render(request, 'search_results.html', {
         'query': query,
         'stocks': stocks,
