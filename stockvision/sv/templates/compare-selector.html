@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% load static %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Select Stocks to Compare</title>
+    <link rel="stylesheet" href="{% static 'styles.css' %}">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f2f5;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .form-container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+            max-width: 400px;
+            width: 100%;
+        }
+        .form-container h1 {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #0b3954;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0a3146;
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <h1>Compare Two Stocks</h1>
+        <form action="{% url 'compare_stocks' %}" method="get">
+            <div class="form-group">
+                <label for="stock1">Select First Stock:</label>
+                <select id="symbol" name="symbol">
+                    <option value="" disabled selected>Choose a stock</option>
+                    {% for stock in stocks %}
+                        <option value="{{ stock.ticker }}">{{ stock.name }} ({{ stock.ticker }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="stock2">Select Second Stock:</label>
+                <select id="compare-symbol" name="compare-symbol">
+                    <option value="" disabled selected>Choose a stock</option>
+                    {% for stock in stocks %}
+                        <option value="{{ stock.ticker }}">{{ stock.name }} ({{ stock.ticker }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button type="submit">Compare</button>
+        </form>
+    </div>
+</body>
+</html>

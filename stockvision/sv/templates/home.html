@@ -20,7 +20,7 @@
         }
 
         .sidebar {
-            width: 250px;
+            width: 350px;
             height: 100vh;
             background-color: #0b3954;
             padding-top: 20px;
@@ -43,6 +43,7 @@
             font-size: 1rem;
             cursor: pointer;
             transition: background-color 0.3s;
+            text-decoration: none;
         }
 
         .sidebar .button:hover {
@@ -102,7 +103,6 @@
             background-color: #1d4e89;
         }
 
-        /* Autocomplete styles */
         .autocomplete-items {
             position: absolute;
             border: 1px solid #d4d4d4;
@@ -112,7 +112,6 @@
             top: 100%;
             left: 0;
             right: 0;
-            background-color: #fff;
         }
 
         .autocomplete-items div {
@@ -163,10 +162,12 @@
 
 <body>
     <div class="sidebar">
-        <button class="button">Log Out</button>
-        <button class="button">Profile</button>
-        <button class="button">Request Stock</button>
-        <button class="button">About Us</button>
+        <a href="{% url 'userdetails' %}" class="button">Profile</a>
+        <a href="{% url 'userwatchlist' %}" class="button">Watchlist</a>
+        <a class="button">Request Stock</a>
+        <a href="{% url 'compare_selector' %}" class="button">Compare Stocks</a>
+        <a class="button">About Us</a>
+        <a href="{% url 'logout' %}" class="button">Log Out</a>
     </div>
 
     <div class="container">
@@ -174,10 +175,8 @@
         <p class="sub-header">See the future of your investments</p>
 
         <div class="search-bar">
-            <form method="GET" action="{% url 'search_stocks' %}" style="display: inline-block; width: 100%;">
-                <input type="text" class="search-input" id="stockSearch" name="query" placeholder="Search for a stock...">
-                <button type="submit" class="search-button">Search</button>
-            </form>
+            <input type="text" class="search-input" id="stockSearch" placeholder="Search for a stock...">
+            <button class="search-button">Search</button>
             <div id="autocomplete-list" class="autocomplete-items"></div>
         </div>
 
@@ -195,35 +194,23 @@
 
     <script>
         document.getElementById('stockSearch').addEventListener('input', function () {
-            const query = this.value;
+            var query = this.value;
 
             if (query.length > 0) {
-                fetch(`/search_stocks/?query=${encodeURIComponent(query)}`, {
-                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
-                })
+                fetch(`/search_stocks/?q=` + query)
                 .then(response => response.json())
                 .then(data => {
-                    const autocompleteList = document.getElementById('autocomplete-list');
-                    autocompleteList.innerHTML = ''; // Clear previous results
+                    var autocompleteList = document.getElementById('autocomplete-list');
+                    autocompleteList.innerHTML = '';
 
-                    if (data.length === 0) {
-                        const noResultItem = document.createElement('div');
-                        noResultItem.innerHTML = "No results found.";
-                        autocompleteList.appendChild(noResultItem);
-                    } else {
-                        data.forEach(stock => {
-                            const item = document.createElement('div');
-                            item.className = "autocomplete-item";
-                            item.innerHTML = `${stock.name} (${stock.ticker})`;
-                            item.addEventListener('click', function () {
-                                window.location.href = `/stock/${stock.ticker}/`;
-                            });
-                            autocompleteList.appendChild(item);
+                    data.forEach(stock => {
+                        var item = document.createElement('div');
+                        item.innerHTML = stock.name;
+                        item.addEventListener('click', function() {
+                            window.location.href = `/stock/${stock.ticker}/`;
                         });
-                    }
-                })
-                .catch(error => {
-                    console.error("Error fetching autocomplete suggestions:", error);
+                        autocompleteList.appendChild(item);
+                    });
                 });
             } else {
                 document.getElementById('autocomplete-list').innerHTML = '';

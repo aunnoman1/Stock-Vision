@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% load static %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ stock_data.name }} - Stock Details</title>
+    <link rel="stylesheet" href="{% static 'styles.css' %}">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f2f5;
+            color: #333;
+        }
+        .container {
+            display: flex;
+            justify-content: space-between;
+            max-width: 100%;
+            margin: 0 auto;
+            padding: 20px;
+            gap: 20px;
+        }
+        .section {
+            flex: 1;
+            padding: 10px;
+            box-sizing: border-box;
+            border: 1px solid #ddd;
+            background-color: white;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .header {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #0b3954;
+        }
+        .current-price {
+            font-size: 1.5rem;
+            color: #0b3954;
+            margin-top: 10px;
+        }
+        .price-summary {
+            margin-top: 20px;
+            font-size: 1.2rem;
+        }
+        .price-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        .price-table th, .price-table td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: center;
+        }
+        .price-table th {
+            background-color: #0b3954;
+            color: white;
+        }
+        .price-table tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        .graph-buttons {
+            margin-bottom: 20px;
+        }
+        .graph-buttons button {
+            margin: 5px;
+        }
+    </style>
+
+    <!-- Load Chart.js from CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.1/chart.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- Left Section (Primary Stock) -->
+        <div class="section">
+            <h1 class="header">{{ stock_data.name }} ({{ stock_data.ticker }})</h1>
+            
+            {% if latest_price %}
+                <p class="current-price">Current Price: ${{ latest_price.close }}</p>
+            {% else %}
+                <p class="current-price">Current Price: Not available</p>
+            {% endif %}
+            
+            <p>Predicted Price: ${{ stock_data.prediction }}</p>
+    
+            <div class="price-summary">
+                <p>Highest Price in last 6 months: ${{ max_price }}</p>
+                <p>Lowest Price in last 6 months: ${{ min_price }}</p>
+            </div>
+    
+            <div id="candlestick-chart-left" style="height: 300px;"></div>
+    
+            <table class="price-table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Open</th>
+                        <th>High</th>
+                        <th>Low</th>
+                        <th>Close</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for price in stock_prices %}
+                    <tr>
+                        <td>{{ price.date|date:"F j, Y" }}</td>
+                        <td>${{ price.open }}</td>
+                        <td>${{ price.high }}</td>
+                        <td>${{ price.low }}</td>
+                        <td>${{ price.close }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    
+        <!-- Right Section (Comparison Stock) -->
+        <div class="section">
+            {% if compare_stock_data %}
+                <h1 class="header">{{ compare_stock_data.name }} ({{ compare_stock_data.ticker }})</h1>
+                
+                {% if compare_latest_price %}
+                    <p class="current-price">Current Price: ${{ compare_latest_price.close }}</p>
+                {% else %}
+                    <p class="current-price">Current Price: Not available</p>
+                {% endif %}
+                
+                <p>Predicted Price: ${{ compare_stock_data.prediction }}</p>
+    
+                <div class="price-summary">
+                    <p>Highest Price in last 6 months: ${{ compare_max_price }}</p>
+                    <p>Lowest Price in last 6 months: ${{ compare_min_price }}</p>
+                </div>
+    
+                <div id="candlestick-chart-right" style="height: 300px;"></div>
+    
+                <table class="price-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Open</th>
+                            <th>High</th>
+                            <th>Low</th>
+                            <th>Close</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for price in compare_stock_prices %}
+                        <tr>
+                            <td>{{ price.date|date:"F j, Y" }}</td>
+                            <td>${{ price.open }}</td>
+                            <td>${{ price.high }}</td>
+                            <td>${{ price.low }}</td>
+                            <td>${{ price.close }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p>No comparison stock selected.</p>
+            {% endif %}
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/plotly.js-dist@2.16.1/plotly.min.js"></script>
+    <script>
+        const chartDataLeft = {
+            dates: {{ chart_data.dates|safe }},
+            close_prices: {{ chart_data.close_prices|safe }},
+            open_prices: {{ chart_data.open_prices|safe }},
+            high_prices: {{ chart_data.high_prices|safe }},
+            low_prices: {{ chart_data.low_prices|safe }}
+        };
+    
+        const chartDataRight = {
+            dates: {{ compare_chart_data.dates|safe }},
+            close_prices: {{ compare_chart_data.close_prices|safe }},
+            open_prices: {{ compare_chart_data.open_prices|safe }},
+            high_prices: {{ compare_chart_data.high_prices|safe }},
+            low_prices: {{ compare_chart_data.low_prices|safe }}
+        };
+    
+        function plotChart(chartId, data) {
+            const trace = {
+                x: data.dates,
+                close: data.close_prices,
+                open: data.open_prices,
+                high: data.high_prices,
+                low: data.low_prices,
+                type: 'candlestick',
+                name: 'Candlestick Data',
+                increasing: { line: { color: 'green' } },
+                decreasing: { line: { color: 'red' } }
+            };
+    
+            const layout = {
+                title: 'Stock Price',
+                xaxis: { title: 'Date', rangeslider: { visible: false } },
+                yaxis: { title: 'Price' }
+            };
+    
+            Plotly.newPlot(chartId, [trace], layout);
+        }
+    
+        plotChart('candlestick-chart-left', chartDataLeft);
+        plotChart('candlestick-chart-right', chartDataRight);
+    </script>
+</body>
+</html>
