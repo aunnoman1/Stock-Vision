@@ -145,3 +145,61 @@ def logout_view(request):
     logout(request)
     
     return redirect('login')#donee
+def compare_stocks(request):
+    stock = get_object_or_404(Stock, ticker=request.GET.get('symbol'))
+    compare_stock = get_object_or_404(Stock, ticker=request.GET.get('compare-symbol'))
+    latest_price = stock.prices.order_by('-date').first()
+    stock_prices = stock.prices.order_by('date')[:100]
+
+    if stock_prices.exists():
+        min_price = min(price.low for price in stock_prices)
+        max_price = max(price.high for price in stock_prices)
+    else:
+        min_price = max_price = None
+
+    chart_data = {
+        'dates': [price.date.strftime('%Y-%m-%d') for price in stock_prices],
+        'open_prices': [float(price.open) for price in stock_prices],
+        'close_prices': [float(price.close) for price in stock_prices],
+        'high_prices': [float(price.high) for price in stock_prices],
+        'low_prices': [float(price.low) for price in stock_prices],
+    }
+
+
+    
+    compare_latest_price = compare_stock.prices.order_by('-date').first()
+    compare_stock_prices = compare_stock.prices.order_by('date')[:100]
+
+    if compare_stock_prices.exists():
+        compare_min_price = min(price.low for price in compare_stock_prices)
+        compare_max_price = max(price.high for price in compare_stock_prices)
+
+    compare_chart_data = {
+        'dates': [price.date.strftime('%Y-%m-%d') for price in compare_stock_prices],
+        'open_prices': [float(price.open) for price in compare_stock_prices],
+        'close_prices': [float(price.close) for price in compare_stock_prices],
+        'high_prices': [float(price.high) for price in compare_stock_prices],
+        'low_prices': [float(price.low) for price in compare_stock_prices],
+    }
+
+    return render(request, 'compare_stocks.html', {
+        'stock_data': stock,
+        'latest_price': latest_price,
+        'stock_prices': stock_prices,
+        'min_price': min_price,
+        'max_price': max_price,
+        'chart_data': chart_data,
+
+        'compare_stock_data': compare_stock,
+        'compare_latest_price': compare_latest_price,
+        'compare_stock_prices': compare_stock_prices,
+        'compare_min_price': compare_min_price,
+        'compare_max_price': compare_max_price,
+        'compare_chart_data': compare_chart_data,
+    })
+def compare_selector(request):
+    stocks = Stock.objects.all()
+
+    return render(request, 'compare-selector.html', {
+        'stocks': stocks,
+    })
