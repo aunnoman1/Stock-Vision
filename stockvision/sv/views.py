@@ -12,6 +12,10 @@ from django.utils import timezone
 from datetime import timedelta
 from .models import Stock 
 from django.db.models import Q
+import logging
+from django.views.decorators.csrf import csrf_exempt
+
+logger = logging.getLogger(__name__)
 
 def homepage_view(request):
     return render(request, 'home.html')
@@ -61,13 +65,12 @@ def stock_detail(request, symbol):
         'max_price': max_price,
         'chart_data': chart_data,
         'time_span': time_span,
-        'recent_posts': recent_posts,  # Include recent posts in the context
+        'recent_posts': recent_posts,  
     })
 
 def search_stocks(request):
     query = request.GET.get('query', '')
     
-    # Check if there's a query, then filter by name or ticker
     if query:
         stocks = Stock.objects.filter(
             Q(name__icontains=query) | Q(ticker__icontains=query)
@@ -75,12 +78,10 @@ def search_stocks(request):
     else:
         stocks = []
 
-    # Handle AJAX request for suggestions
     if request.headers.get('x-requested-with') == 'XMLHttpRequest':
         suggestions = [{'name': stock.name, 'ticker': stock.ticker} for stock in stocks]
         return JsonResponse(suggestions, safe=False)
 
-    # Render results for a normal request
     return render(request, 'search_results.html', {
         'query': query,
         'stocks': stocks,
@@ -145,6 +146,47 @@ def logout_view(request):
     logout(request)
     
     return redirect('login')#donee
+
+@login_required
+def add_to_watchlist(request, stock_id):
+    if request.method == "POST":
+        stock = get_object_or_404(Stock, id=stock_id)
+        watchlist, created = Watchlist.objects.get_or_create(user=request.user)
+
+        if stock not in watchlist.stocks.all():
+            watchlist.stocks.add(stock)
+            logger.info(f"Added {stock.ticker} to {request.user.username}'s watchlist.")  
+            return JsonResponse({"message": "Stock added to watchlist!", "status": "success"})
+        logger.info(f"{stock.ticker} already in {request.user.username}'s watchlist.")  
+        return JsonResponse({"message": "Stock is already in the watchlist.", "status": "info"})
+    logger.error("Invalid request method.")  
+    return JsonResponse({"error": "Invalid request."}, status=400)
+
+@login_required
+def remove_from_watchlist(request, stock_id):
+    logger.info(f"Request received to remove stock ID {stock_id} for user {request.user}.")
+    
+    try:
+        stock = get_object_or_404(Stock, id=stock_id)
+        logger.info(f"Found stock: {stock.ticker}")
+
+        watchlist = Watchlist.objects.filter(user=request.user).first()
+        if not watchlist:
+            logger.warning(f"No watchlist found for user {request.user}.")
+            return JsonResponse({"message": "No watchlist found.", "status": "error"}, status=404)
+
+        if stock in watchlist.stocks.all():
+            watchlist.stocks.remove(stock)
+            logger.info(f"Removed stock {stock.ticker} from watchlist for user {request.user}.")
+            return JsonResponse({"message": "Stock removed successfully.", "status": "success"})
+        else:
+            logger.info(f"Stock {stock.ticker} not found in watchlist for user {request.user}.")
+            return JsonResponse({"message": "Stock not in watchlist.", "status": "info"})
+
+    except Exception as e:
+        logger.error(f"Error while removing stock {stock_id}: {e}", exc_info=True)
+        return JsonResponse({"message": "An error occurred while removing the stock.", "status": "error"}, status=500)
+
 def compare_stocks(request):
     stock = get_object_or_404(Stock, ticker=request.GET.get('symbol'))
     compare_stock = get_object_or_404(Stock, ticker=request.GET.get('compare-symbol'))

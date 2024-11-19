@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -9,7 +8,7 @@
         body {
             font-family: Arial, sans-serif;
             background-color: white;
-            color: #4B0082; /* Purple */
+            color: #4B0082;
             margin: 0;
             padding: 0;
         }
@@ -35,9 +34,15 @@
             margin: 5px 0;
             padding: 10px;
             border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
         .stock-item:hover {
             background-color: #e0e0e0;
+        }
+        .actions {
+            margin-left: 20px;
         }
         footer {
             background-color: #4B0082;
@@ -58,15 +63,21 @@
     <div class="content">
         <h2 class="watchlist-title">{{ user.username }}'s Watchlist</h2>
         <ul class="stock-list">
-            {% for stock in watchlist.stocks.all %}
-                <li class="stock-item">
-                    <strong>{{ stock.name }} ({{ stock.ticker }})</strong><br>
-                    Description: {{ stock.description }}<br>
-                    Sector: {{ stock.sector }}<br>
-                    Prediction: ${{ stock.prediction }}
+            {% for stock in watchlist_stocks %}
+                <li class="stock-item" id="stock-{{ stock.ticker }}">
+                    <div class="stock-info">
+                        <strong>{{ stock.name }} ({{ stock.ticker }})</strong><br>
+                        Description: {{ stock.description }}<br>
+                        Sector: {{ stock.sector }}<br>
+                        Prediction: ${{ stock.prediction }}
+                    </div>
+                    <div class="actions">
+                        <a href="{% url 'stock_detail' stock.ticker %}">View Details</a>
+                        <button class="remove-btn" data-stock-id="{{ stock.id }}"style="background: none; border: none; color: red; cursor: pointer;">Remove</button>
+                    </div>
                 </li>
             {% empty %}
-                <li>No stocks in watchlist.</li>
+                <li>No stocks in your watchlist.</li>
             {% endfor %}
         </ul>
     </div>
@@ -74,5 +85,43 @@
     <footer>
         <p>&copy; 2024 StockVision</p>
     </footer>
+
+    <script>
+        document.querySelectorAll('.remove-btn').forEach(button => {
+            button.addEventListener('click', async function () {
+                const stockId = this.dataset.stockId;
+                const stockItem = document.getElementById(`stock-${stockId}`);
+        
+                console.log(`Removing stock: ${stockId}`); // Log the stock ID for debugging
+        
+                try {
+                    const response = await fetch(`/watchlist/remove/${stockId}/`, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRFToken': '{{ csrf_token }}',
+                            'Content-Type': 'application/json',
+                        },
+                    });
+        
+                    if (!response.ok) {
+                        console.error(`Failed: ${response.status}`);
+                        throw new Error(`HTTP status ${response.status}`);
+                    }
+        
+                    const data = await response.json();
+                    console.log('Response:', data); // Log response
+        
+                    if (data.status === 'success') {
+                        stockItem.remove(); // Dynamically remove the stock
+                    } else {
+                        alert(data.message || 'Failed to remove the stock.');
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert('Failed to remove the stock. Please try again.');
+                }
+            });
+        });                  
+    </script>    
 </body>
 </html>

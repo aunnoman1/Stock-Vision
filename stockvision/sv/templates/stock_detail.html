@@ -89,21 +89,115 @@
         <a href="#price-table">Go to Price Table</a>
     </div>
 
-    <!-- BAsic details-->
+    <!-- Watchlist Buttons (Top Right) -->
+    <div class="watchlist-buttons" style="position: fixed; top: 20px; right: 20px; text-align: center;">
+        <button id="add-to-watchlist" data-url="{% url 'add_to_watchlist' stock_data.id %}" 
+                style="background-color: #4CAF50; color: white; border: none; padding: 10px 20px; border-radius: 5px; margin-bottom: 10px;">
+            Add to Watchlist
+        </button>
+        
+        <button id="remove-from-watchlist" data-url="{% url 'remove_from_watchlist' stock_data.id %}" 
+                style="background-color: #f44336; color: white; border: none; padding: 10px 20px; border-radius: 5px;">
+            Remove from Watchlist
+        </button>
+    </div>    
+
+    <!-- watchlist handling-->
+<div id="watchlist-popup" style="display:none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: white; padding: 20px; border: 1px solid black; border-radius: 10px;">
+    <p id="popup-message" style="font-size: 16px; color: white;"></p>
+    <button onclick="document.getElementById('watchlist-popup').style.display='none'">Close</button>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const addButton = document.querySelector("#add-to-watchlist");
+        if (addButton) {
+            addButton.addEventListener("click", (event) => {
+                event.preventDefault();
+                const url = addButton.getAttribute("data-url");
+
+                fetch(url, {
+                    method: "POST",
+                    headers: {
+                        "X-CSRFToken": "{{ csrf_token }}",
+                        "Content-Type": "application/json"
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    const popupMessage = document.getElementById("popup-message");
+                    const popup = document.getElementById("watchlist-popup");
+                    
+                    if (data.message) {
+                        popupMessage.textContent = data.message;
+                        popup.style.display = "block";
+                        popup.style.backgroundColor = "green"; 
+                    } else if (data.error) {
+                        popupMessage.textContent = data.error;
+                        popup.style.display = "block";
+                        popup.style.backgroundColor = "red"; 
+                    }
+                })
+                .catch(error => {
+                    console.error("Error:", error);
+                    alert("An error occurred while adding to the watchlist.");
+                });
+            });
+        }
+
+        // Remove from Watchlist Button
+        const removeButton = document.querySelector("#remove-from-watchlist");
+        if (removeButton) {
+            removeButton.addEventListener("click", (event) => {
+                event.preventDefault();
+                const url = removeButton.getAttribute("data-url");
+
+                fetch(url, {
+                    method: "POST",
+                    headers: {
+                        "X-CSRFToken": "{{ csrf_token }}",
+                        "Content-Type": "application/json"
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    const popupMessage = document.getElementById("popup-message");
+                    const popup = document.getElementById("watchlist-popup");
+
+                    if (data.message) {
+                        popupMessage.textContent = data.message;
+                        popup.style.display = "block";
+                        popup.style.backgroundColor = "red"; // Red background for removing stock
+                    } else if (data.error) {
+                        popupMessage.textContent = data.error;
+                        popup.style.display = "block";
+                        popup.style.backgroundColor = "red"; // Red background for errors
+                    }
+                })
+                .catch(error => {
+                    console.error("Error:", error);
+                    alert("An error occurred while removing from the watchlist.");
+                });
+            });
+        }
+    });
+</script>
+    
+    <!-- Basic Details -->
     <div class="container">
         <h1 class="header">{{ stock_data.name }} ({{ stock_data.ticker }})</h1>
-        
+
         {% if latest_price %}
             <p class="current-price">Current Price: ${{ latest_price.close }}</p>
         {% else %}
             <p class="current-price">Current Price: Not available</p>
         {% endif %}
-        
-        <p>Predicted Price: ${{ stock_data.prediction }}</p>
+
+        <p><strong>Predicted Price:</strong> ${{ stock_data.prediction }}</p>
 
         <div class="price-summary">
             <p>Highest Price in last 6 months: ${{ max_price }}</p>
-            <p style="margin-bottom: 50px;">Lowest Price in last 6 months: ${{ min_price }} </p>
+            <p style="margin-bottom: 50px;">Lowest Price in last 6 months: ${{ min_price }}</p>
         </div>
 
         <!-- show recent 5 posts-->
@@ -252,6 +346,7 @@
         </script>             
         
         <!-- Price Data Table -->
+        <p><strong>Price Data Table:</strong> Below is the historical price data for {{ stock_data.name }} over the selected time period.</p>
         <table id="price-table" class="price-table">
             <thead>
                 <tr>
@@ -274,6 +369,7 @@
                 {% endfor %}
             </tbody>
         </table>
+        
     </div>
 </body>
 </html>
