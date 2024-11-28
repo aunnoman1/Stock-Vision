@@ -187,13 +187,19 @@
         <div class="trending-section">
             <h2 class="trending-header">Trending Stocks</h2>
             <ul class="stock-list">
-                <li class="stock-item"><a href="{% url 'stock_detail' symbol='AAPL' %}">AAPL - Apple Inc.</a></li>
-                <li class="stock-item"><a href="{% url 'stock_detail' symbol='TSLA' %}">TSLA - Tesla, Inc.</a></li>
-                <li class="stock-item"><a href="{% url 'stock_detail' symbol='GOOGL' %}">GOOGL - Alphabet Inc.</a></li>
-                <li class="stock-item"><a href="{% url 'stock_detail' symbol='AMZN' %}">AMZN - Amazon.com, Inc.</a></li>
-                <li class="stock-item"><a href="{% url 'stock_detail' symbol='MSFT' %}">MSFT - Microsoft Corporation</a></li>
+                {% for price in trending_stocks %}
+                <li class="stock-item">
+                    <a href="{% url 'stock_detail' symbol=price.stock.ticker %}">
+                        {{ price.stock.ticker }} - {{ price.stock.name }}
+                    </a> 
+                    (Volume: {{ price.volume }})
+                </li>
+                {% empty %}
+                <li>No trending stocks available.</li>
+                {% endfor %}
             </ul>
         </div>
+        
     </div>
 
     <script>

@@ -17,8 +17,20 @@ from django.views.decorators.csrf import csrf_exempt
 
 logger = logging.getLogger(__name__)
 
+from django.shortcuts import render
+from .models import Price
+
 def homepage_view(request):
-    return render(request, 'home.html')
+    # Get the latest date from the Price table
+    latest_date = Price.objects.latest('date').date
+    # Get stocks with the highest volume on the latest date
+    trending_stocks = Price.objects.filter(date=latest_date).order_by('-volume')[:5]
+
+    context = {
+        'trending_stocks': trending_stocks,
+    }
+    return render(request, 'home.html', context)
+
 
 def stock_detail(request, symbol):
     stock = get_object_or_404(Stock, ticker=symbol)
