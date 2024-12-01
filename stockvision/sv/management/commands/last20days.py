@@ -30,7 +30,6 @@ def fetch_reddit_posts(subreddit, stocks, max_posts_per_stock=None):
     stock_posts = {stock: [] for stock in stocks}
     base_url = f"https://reddit.com/r/{subreddit}/search.json"
     
-    # Calculate the timestamp for 20 days ago (from now)
     twenty_days_ago = datetime.utcnow() - timedelta(days=20)
     twenty_days_ago_timestamp = int(twenty_days_ago.timestamp())
     
@@ -39,11 +38,11 @@ def fetch_reddit_posts(subreddit, stocks, max_posts_per_stock=None):
         
         while max_posts_per_stock is None or len(stock_posts[stock]) < max_posts_per_stock:
             params = {
-                'q': stock,  # Search for the stock keyword
-                'sort': 'new',  # Sort by the newest posts
-                'limit': 100,  # Max posts per request
-                'restrict_sr': True,  # Restrict to the subreddit
-                'after': after  # Fetch posts after the 20-day timestamp
+                'q': stock,
+                'sort': 'new',
+                'limit': 100,
+                'restrict_sr': True,
+                'after': after
             }
             
             response = requests.get(base_url, headers=headers, params=params)
@@ -61,20 +60,21 @@ def fetch_reddit_posts(subreddit, stocks, max_posts_per_stock=None):
                 break
             
             posts = data['data']['children']
-            if not posts:  # Exit if no more posts
+            if not posts:
                 break
             
             for post in posts:
                 post_data = post['data']
                 title = post_data['title'].lower()
+                content = post_data.get('selftext', '').lower()  # Fetch the content (selftext)
                 author = post_data.get('author', 'N/A')
                 created_utc = post_data.get('created_utc')
 
-                # Check if the post is within the last 20 days
                 if created_utc and created_utc >= twenty_days_ago_timestamp:
                     created_time = datetime.utcfromtimestamp(created_utc).strftime('%Y-%m-%d %H:%M:%S')
                     stock_posts[stock].append({
                         'title': title,
+                        'content': content,
                         'author': author,
                         'created_time': created_time
                     })
@@ -109,7 +109,7 @@ def get_aggregated_stock_posts(subreddits, stocks, max_posts_per_stock=None):
                 continue
             
             for post in stock_posts[stock]:
-                # Check if post already exists in the database
+                # Check if post already exists
                 if Post.objects.filter(
                     stock=stock_obj,
                     text=post['title'],
@@ -119,13 +119,18 @@ def get_aggregated_stock_posts(subreddits, stocks, max_posts_per_stock=None):
                     print(f"Duplicate post found: {post['title']} - Skipping")
                     continue
                 
-                sentiment = analyze_sentiment(post['title'])
+                # Combine title and content for sentiment analysis
+                combined_text = f"{post['title']} {post['content']}"
+                sentiment = analyze_sentiment(combined_text)
+                
+                # Save the post
                 p = Post.objects.create(
                     stock=stock_obj,
                     author=post['author'],
                     time=post['created_time'],
                     sentiment=sentiment,
-                    text=post['title'],
+                    title=post['title'],
+                    content=post['content']  # Save content
                 )
                 p.save()
 
