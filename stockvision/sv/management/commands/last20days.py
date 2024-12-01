@@ -30,18 +30,18 @@ def fetch_reddit_posts(subreddit, stocks, max_posts_per_stock=None):
     stock_posts = {stock: [] for stock in stocks}
     base_url = f"https://reddit.com/r/{subreddit}/search.json"
     
-    
+    # Calculate the timestamp for 20 days ago (from now)
     twenty_days_ago = datetime.utcnow() - timedelta(days=20)
     twenty_days_ago_timestamp = int(twenty_days_ago.timestamp())
     
     for stock in stocks:
-        after = twenty_days_ago_timestamp  
+        after = twenty_days_ago_timestamp  # Start fetching posts from 20 days ago
         
         while max_posts_per_stock is None or len(stock_posts[stock]) < max_posts_per_stock:
             params = {
                 'q': stock,  # Search for the stock keyword
                 'sort': 'new',  # Sort by the newest posts
-                'limit': 100,  # Max posts per request (700 may hit API limits)
+                'limit': 100,  # Max posts per request
                 'restrict_sr': True,  # Restrict to the subreddit
                 'after': after  # Fetch posts after the 20-day timestamp
             }
@@ -70,7 +70,7 @@ def fetch_reddit_posts(subreddit, stocks, max_posts_per_stock=None):
                 author = post_data.get('author', 'N/A')
                 created_utc = post_data.get('created_utc')
 
-               
+                # Check if the post is within the last 20 days
                 if created_utc and created_utc >= twenty_days_ago_timestamp:
                     created_time = datetime.utcfromtimestamp(created_utc).strftime('%Y-%m-%d %H:%M:%S')
                     stock_posts[stock].append({
@@ -79,13 +79,11 @@ def fetch_reddit_posts(subreddit, stocks, max_posts_per_stock=None):
                         'created_time': created_time
                     })
 
-                    # Break if the desired number of posts is reached
                     if max_posts_per_stock and len(stock_posts[stock]) >= max_posts_per_stock:
                         break
             
-            # Update `after` for pagination to continue fetching newer posts
             after = posts[-1]['data']['created_utc']
-            if after < twenty_days_ago_timestamp:  
+            if after < twenty_days_ago_timestamp:
                 break
     
     return stock_posts
@@ -111,6 +109,16 @@ def get_aggregated_stock_posts(subreddits, stocks, max_posts_per_stock=None):
                 continue
             
             for post in stock_posts[stock]:
+                # Check if post already exists in the database
+                if Post.objects.filter(
+                    stock=stock_obj,
+                    text=post['title'],
+                    author=post['author'],
+                    time=post['created_time']
+                ).exists():
+                    print(f"Duplicate post found: {post['title']} - Skipping")
+                    continue
+                
                 sentiment = analyze_sentiment(post['title'])
                 p = Post.objects.create(
                     stock=stock_obj,
