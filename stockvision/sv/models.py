@@ -31,6 +31,9 @@ class Post(models.Model):
     author = models.CharField(max_length=100) 
     time = models.DateTimeField(auto_now_add=True)
     sentiment = models.DecimalField(max_digits=10, decimal_places=2) 
+    pos= models.DecimalField(max_digits=10, decimal_places=2)
+    neg= models.DecimalField(max_digits=10, decimal_places=2)
+    neu= models.DecimalField(max_digits=10, decimal_places=2)
     text = models.TextField()
 
     def __str__(self):
