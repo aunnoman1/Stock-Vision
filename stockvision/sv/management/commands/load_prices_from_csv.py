@@ -12,7 +12,7 @@ STOCK_SYMBOLS = [
             'COST', 'SMCI', 'CVX', 'V', 'COIN'
         ]
 
-DATA_FOLDER = os.path.join(os.path.dirname(__file__), '..\..\..\..\data')
+DATA_FOLDER = os.path.join(os.path.dirname(__file__), '..','..','..','..','data')
 
 class Command(BaseCommand):
     help = "Populate the database with stock prices from csv located in 'data' folder in root of project"
