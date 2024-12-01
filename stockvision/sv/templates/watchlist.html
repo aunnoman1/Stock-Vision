@@ -73,8 +73,6 @@
                     </div>
                     <div class="actions">
                         <a href="{% url 'stock_detail' stock.ticker %}">View Details</a>
-                        <button class="remove-btn" data-stock-id="{{ stock.id }}"style="background: none; border: none; color: red; cursor: pointer;">Remove</button>
-                    </div>
                 </li>
             {% empty %}
                 <li>No stocks in your watchlist.</li>
@@ -86,42 +84,5 @@
         <p>&copy; 2024 StockVision</p>
     </footer>
 
-    <script>
-        document.querySelectorAll('.remove-btn').forEach(button => {
-            button.addEventListener('click', async function () {
-                const stockId = this.dataset.stockId;
-                const stockItem = document.getElementById(`stock-${stockId}`);
-        
-                console.log(`Removing stock: ${stockId}`); // Log the stock ID for debugging
-        
-                try {
-                    const response = await fetch(`/watchlist/remove/${stockId}/`, {
-                        method: 'POST',
-                        headers: {
-                            'X-CSRFToken': '{{ csrf_token }}',
-                            'Content-Type': 'application/json',
-                        },
-                    });
-        
-                    if (!response.ok) {
-                        console.error(`Failed: ${response.status}`);
-                        throw new Error(`HTTP status ${response.status}`);
-                    }
-        
-                    const data = await response.json();
-                    console.log('Response:', data); // Log response
-        
-                    if (data.status === 'success') {
-                        stockItem.remove(); // Dynamically remove the stock
-                    } else {
-                        alert(data.message || 'Failed to remove the stock.');
-                    }
-                } catch (error) {
-                    console.error('Error:', error);
-                    alert('Failed to remove the stock. Please try again.');
-                }
-            });
-        });                  
-    </script>    
 </body>
 </html>
