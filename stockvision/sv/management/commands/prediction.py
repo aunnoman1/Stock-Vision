@@ -9,13 +9,21 @@ import yfinance as yf
 from datetime import datetime
 import os
 
+def categorize_sentiment(row):
+    if row['pos'] > row['neg'] and row['pos'] > row['neu']:
+        return 'positive'
+    elif row['neg'] > row['pos'] and row['neg'] > row['neu']:
+        return 'negative'
+    else:
+        return 'neutral'
+
 class Command(BaseCommand):
     help = "Predict stock prices using AI model"
 
     def handle(self, *args, **options):
         # Load scaler and model
-        scaler = joblib.load(os.path.join('..','..','models','avg_ratio_scaler.joblib'))
-        model = tf.keras.models.load_model(os.path.join('..','..','models','avg_ratio_lstm_larger_model.keras'))
+        scaler = joblib.load(os.path.join('sv','models','avg_ratio_scaler.joblib'))
+        model = tf.keras.models.load_model(os.path.join('sv','models','avg_ratio_lstm_larger_model.keras'))
         
         # Process each stock
         for stock in Stock.objects.all():
@@ -23,6 +31,7 @@ class Command(BaseCommand):
             
             # Fetch the last 20 days of price data
             recent_prices = Price.objects.filter(stock=stock).order_by('-date')[:21]
+            print(recent_prices)
             if len(recent_prices) < 20:
                 self.stdout.write(f"Not enough price data for {stock.ticker}. Skipping.")
                 continue
@@ -40,26 +49,65 @@ class Command(BaseCommand):
                 continue
 
             sentiment_df['Date'] = pd.to_datetime(sentiment_df['time']).dt.date
+            
+            aggregated_posts_df = sentiment_df.groupby("Date", as_index=False)[["pos", "neg", "neu"]].mean()
+            
             average_sentiments = sentiment_df.groupby('Date')[['pos', 'neg', 'neu']].mean().reset_index()
             average_sentiments.columns = ['Date', 'average_pos', 'average_neg', 'average_neu']
 
+            sentiment_df['sentiment_category'] = sentiment_df.apply(categorize_sentiment, axis=1)
+
+            # Calculate daily sentiment ratios
+            sentiment_ratios = (
+                sentiment_df.groupby(['Date', 'sentiment_category'])
+                .size()
+                .unstack(fill_value=0)
+                .reset_index()
+            )
+            if 'negative' not in sentiment_ratios.columns:
+                sentiment_ratios['negative'] = 0
+            if 'positive' not in sentiment_ratios.columns:
+                sentiment_ratios['positive'] = 0
+
+            sentiment_ratios['total_posts'] = sentiment_ratios[['positive', 'negative', 'neutral']].sum(axis=1)
+            sentiment_ratios['positive_ratio'] = sentiment_ratios['positive'] / sentiment_ratios['total_posts']
+            sentiment_ratios['negative_ratio'] = sentiment_ratios['negative'] / sentiment_ratios['total_posts']
+            sentiment_ratios['neutral_ratio'] = sentiment_ratios['neutral'] / sentiment_ratios['total_posts']
+
+            # Merge the average sentiments and sentiment ratios back into the original DataFrame
+            combined_sentiments = pd.merge(average_sentiments, sentiment_ratios, on='Date', how='inner')
+
+
+            combined_sentiments.drop(columns=['positive', 'negative', 'neutral', 'total_posts'], inplace=True)
+
+
+
             # Merge price and sentiment data
             price_data['Date'] = pd.to_datetime(price_data['date']).dt.date
-            merged_df = pd.merge(price_data, average_sentiments, on='Date', how='left')
-            merged_df.fillna(0.333333, inplace=True)
+            merged_df = pd.merge(price_data, combined_sentiments, on='Date', how='left')
+            merged_df.fillna(float(0.333333), inplace=True)
 
+            #print(merged_df.info())
+            merged_df['close'] = merged_df['close'].astype(float)
             # Compute additional features
-            merged_df['LogReturn_Close'] = np.log(merged_df['Close'] / merged_df['Close'].shift(1))
-            merged_df['LogReturn_Volume'] = np.log(merged_df['Volume'] / merged_df['Volume'].shift(1))
+            merged_df['LogReturn_Close'] = np.log(merged_df['close'] / merged_df['close'].shift(1))
+            merged_df['LogReturn_Volume'] = np.log(merged_df['volume'] / merged_df['volume'].shift(1))
             merged_df.dropna(inplace=True)
+            merged_df= merged_df.drop(columns=['close','volume','open','high','low'])
+
             feature_cols = [
-                'LogReturn_Close', 'LogReturn_Volume',
-                'average_pos', 'average_neg', 'average_neu'
+                'LogReturn_Close', 'LogReturn_Volume', 
+                'average_pos', 'average_neg', 'average_neu', 
+                'positive_ratio', 'negative_ratio', 'neutral_ratio'
             ]
             merged_df[feature_cols] = scaler.transform(merged_df[feature_cols])
 
             # Prepare input sequence
-            X = np.array([merged_df[feature_cols].iloc[:20].values])
+            X = []
+            group = merged_df.sort_values(by='Date').reset_index(drop=True)
+            input_sequence = group[feature_cols].iloc[0: 20].values
+            X.append(input_sequence)
+            X = np.array(X)
             if X.shape[1] < 20:
                 self.stdout.write(f"Insufficient feature data for {stock.ticker}. Skipping.")
                 continue
@@ -70,7 +118,7 @@ class Command(BaseCommand):
             placeholder_data[0, feature_cols.index('LogReturn_Close')] = predicted_log_return
             inversed_data = scaler.inverse_transform(placeholder_data)
             inversed_y = inversed_data[0, feature_cols.index('LogReturn_Close')]
-            predicted_price = float(price_20days['Close'].iloc[-1]) * np.exp(inversed_y)
+            predicted_price = float(price_data['close'].iloc[-1]) * np.exp(inversed_y)
 
             # Save the prediction to the database
             stock.prediction = round(predicted_price, 2)
