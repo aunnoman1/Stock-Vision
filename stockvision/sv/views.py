@@ -1,16 +1,16 @@
 
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404,get_list_or_404
 from .models import Stock, Watchlist
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login
 from django.contrib import messages
-from django.shortcuts import  redirect
+from django.shortcuts import  redirect,render
 from django.contrib.auth import logout
 from django.utils import timezone
 from datetime import timedelta
-from .models import Stock 
+from .models import Stock,Price
 from django.db.models import Q
 import logging
 from django.views.decorators.csrf import csrf_exempt
@@ -25,12 +25,10 @@ def homepage_view(request):
     latest_date = Price.objects.latest('date').date
     # Get stocks with the highest volume on the latest date
     trending_stocks = Price.objects.filter(date=latest_date).order_by('-volume')[:5]
-
     context = {
         'trending_stocks': trending_stocks,
     }
     return render(request, 'home.html', context)
-
 
 def stock_detail(request, symbol):
     stock = get_object_or_404(Stock, ticker=symbol)
@@ -256,4 +254,26 @@ def compare_selector(request):
 
     return render(request, 'compare-selector.html', {
         'stocks': stocks,
+    })
+
+def select_sector(request):
+    sectors = Stock.objects.values_list('sector', flat=True).distinct()
+    return render(request, 'select_sector.html', {'sectors': sectors})
+
+def sector_stocks(request):
+    selected_sector = request.GET.get('sector')
+    
+    stocks = Stock.objects.filter(sector=selected_sector)
+
+    stocks_with_prices = []
+    for stock in stocks:
+        latest_price = Price.objects.filter(stock=stock).order_by('-date').first()
+        stocks_with_prices.append({
+            'stock': stock,
+            'latest_price': latest_price,
+        })
+
+    return render(request, 'sector_stocks.html', {
+        'sector': selected_sector,
+        'stocks_with_prices': stocks_with_prices
     })

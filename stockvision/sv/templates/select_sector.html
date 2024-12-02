@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Select Sector</title>
+    <style>
+        /* Global Styles */
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f2f5;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+        }
+
+        /* Header Styling */
+        header {
+            background-color: #0b3954; /* Dark blue */
+            width: 100%;
+            text-align: center;
+            padding: 15px 0;  /* Reduced vertical padding */
+            color: #ffffff;  /* White text for better contrast */
+        }
+
+        header h1 {
+            font-size: 2.5rem;  /* Adjusted size for compactness */
+            margin: 0;
+            font-weight: bold;
+            color: #7d7d7d; /* Grey color for "Stock-Vision" */
+        }
+
+        header p {
+            font-size: 1.2rem;
+            margin-top: 5px;  /* Reduced space between title and subtitle */
+            color: #e0e0e0;  /* Lighter color for subtitle */
+        }
+
+        /* Form Container */
+        .form-container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+            max-width: 400px;
+            width: 100%;
+            margin-top: 30px;
+        }
+
+        .form-container h1 {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            text-align: center;
+            color: #0b3954; /* Dark blue title color */
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #0b3954; /* Dark blue label color */
+        }
+
+        select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: #0b3954; /* Dark blue border on focus */
+            box-shadow: 0 0 5px rgba(11, 57, 84, 0.5);
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #0b3954; /* Dark blue button */
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0a3146; /* Slightly darker blue on hover */
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Header Section -->
+    <header>
+        <h1>Stock-Vision</h1>
+        <p>See the future of your investments</p>
+    </header>
+
+    <!-- Main Content Section -->
+    <div class="form-container">
+        <h1>Select a Sector</h1>
+        <form method="GET" action="{% url 'sector_stocks' %}">
+            <label for="sector">Choose a sector:</label>
+            <select id="sector" name="sector" required>
+                {% for sector in sectors %}
+                <option value="{{ sector }}">{{ sector }}</option>
+                {% endfor %}
+            </select>
+            <button type="submit" class="button">View Stocks</button>
+        </form>
+    </div>
+
+</body>
+
+</html>

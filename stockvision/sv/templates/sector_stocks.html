@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stocks in {{ sector }}</title>
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f2f5;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+        }
+
+        /* Header Styling */
+        header {
+            background-color: #0b3954; /* Dark blue */
+            width: 100%;
+            text-align: center;
+            padding: 15px 0;  /* Reduced vertical padding */
+            color: #ffffff;  /* White text for better contrast */
+        }
+
+        header h1 {
+            font-size: 2.5rem;  /* Adjusted size for compactness */
+            margin: 0;
+            font-weight: bold;
+            color: #7d7d7d; /* Grey color for "Stock-Vision" */
+        }
+
+        header p {
+            font-size: 1.2rem;
+            margin-top: 5px;  /* Reduced space between title and subtitle */
+            color: #e0e0e0;  /* Lighter color for subtitle */
+        }
+
+        /* Container Styles */
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+            max-width: 800px;
+            width: 100%;
+            text-align: center;
+            margin-top: 30px;  /* Added space between header and container */
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            color: #0b3954; /* Dark blue title color */
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 0 auto;
+        }
+
+        thead th {
+            background-color: #0b3954; /* Dark blue background */
+            color: white;
+            padding: 10px;
+            text-transform: uppercase;
+            font-size: 14px;
+        }
+
+        tbody tr {
+            background-color: #f9f9f9;
+            transition: background-color 0.3s ease;
+        }
+
+        tbody tr:nth-child(odd) {
+            background-color: #f1f1f1;
+        }
+
+        tbody tr:hover {
+            background-color: #ddd;
+        }
+
+        td, th {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: center;
+        }
+
+        td[colspan="4"] {
+            text-align: center;
+            font-style: italic;
+            color: #888;
+        }
+
+        td:last-child {
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Header Section -->
+    <header>
+        <h1>Stock-Vision</h1>
+        <p>See the future of your investments</p>
+    </header>
+
+    <!-- Main Content Section -->
+    <div class="container">
+        <h1>Stocks in {{ sector }}</h1>
+        <table>
+            <thead>
+                <tr>
+                    <th>Stock</th>
+                    <th>Ticker</th>
+                    <th>Low</th>
+                    <th>High</th>
+                    <th>Recent Close</th>
+                    <th>Volume</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for entry in stocks_with_prices %}
+                <tr>
+                    <td>{{ entry.stock.name }}</td>
+                    <td>{{ entry.stock.ticker }}</td>
+                    {% if entry.latest_price %}
+                    <td>{{ entry.latest_price.low }}</td>
+                    <td>{{ entry.latest_price.high }}</td>
+                    <td>{{ entry.latest_price.close }}</td>
+                    <td>{{ entry.latest_price.volume|floatformat:2 }}</td>
+                    {% else %}
+                    <td colspan="4">No price data available</td>
+                    {% endif %}
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+</body>
+
+</html>

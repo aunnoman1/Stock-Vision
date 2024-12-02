@@ -5,61 +5,119 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>User Watchlist</title>
     <style>
+        /* General Styling */
         body {
-            font-family: Arial, sans-serif;
-            background-color: white;
-            color: #4B0082;
+            font-family: 'Roboto', sans-serif;
+            background-color: #f0f2f5;
+            color: #333;
             margin: 0;
             padding: 0;
         }
+
+        /* Header Styling */
         header {
-            background-color: #4B0082;
-            color: white;
-            padding: 10px 0;
+            background-color: #0b3954;
+            color: #ffffff;
+            text-align: center;
+            padding: 20px 0;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 2.5rem;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+
+        /* Main Content */
+        .content {
+            max-width: 800px;
+            margin: 30px auto;
+            padding: 30px;
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .watchlist-title {
+            font-size: 2rem;
+            color: #0b3954;
+            margin-bottom: 20px;
             text-align: center;
         }
-        .content {
-            padding: 20px;
-        }
-        .watchlist-title {
-            font-size: 24px;
-            margin-bottom: 20px;
-        }
+
+        /* Watchlist Styling */
         .stock-list {
-            list-style-type: none;
+            list-style: none;
             padding: 0;
         }
+
         .stock-item {
-            background-color: #f3f3f3;
-            margin: 5px 0;
-            padding: 10px;
-            border-radius: 5px;
+            background-color: #f9f9f9;
+            margin: 15px 0;
+            padding: 20px;
+            border-radius: 8px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            transition: background-color 0.3s ease, transform 0.2s ease;
         }
+
         .stock-item:hover {
-            background-color: #e0e0e0;
+            background-color: #eaecef;
+            transform: translateY(-2px);
         }
-        .actions {
-            margin-left: 20px;
+
+        .stock-info {
+            color: #0b3954;
+            line-height: 1.6;
         }
+
+        .stock-info strong {
+            font-size: 1.2rem;
+        }
+
+        /* Actions Styling */
+        .actions a {
+            text-decoration: none;
+            background-color: #0b3954;
+            color: #ffffff;
+            padding: 10px 15px;
+            border-radius: 5px;
+            font-size: 0.9rem;
+            transition: background-color 0.3s ease, transform 0.2s;
+        }
+
+        .actions a:hover {
+            background-color: #08324e;
+            transform: scale(1.05);
+        }
+
+        /* Footer Styling */
         footer {
-            background-color: #4B0082;
-            color: white;
+            background-color: #0b3954;
+            color: #ffffff;
             text-align: center;
-            padding: 10px 0;
+            padding: 15px 0;
             position: fixed;
             width: 100%;
             bottom: 0;
         }
+
+        footer p {
+            margin: 0;
+            font-size: 1rem;
+        }
     </style>
 </head>
 <body>
+    <!-- Header Section -->
     <header>
-        <h1>User Watchlist</h1>
+        <h1>Stock-Vision</h1>
+        <p>See the future of your investments</p>
     </header>
 
+    <!-- Main Content -->
     <div class="content">
         <h2 class="watchlist-title">{{ user.username }}'s Watchlist</h2>
         <ul class="stock-list">
@@ -67,12 +125,12 @@
                 <li class="stock-item" id="stock-{{ stock.ticker }}">
                     <div class="stock-info">
                         <strong>{{ stock.name }} ({{ stock.ticker }})</strong><br>
-                        Description: {{ stock.description }}<br>
-                        Sector: {{ stock.sector }}<br>
-                        Prediction: ${{ stock.prediction }}
+                        <span>Description:</span> {{ stock.description }}<br>
+                        <span>Sector:</span> {{ stock.sector }}<br>
+                        <span>Prediction:</span> ${{ stock.prediction }}
                     </div>
                     <div class="actions">
-                        <a href="{% url 'stock_detail' stock.ticker %}">View Details</a>
+                        <a href="{% url 'stock_detail' stock.ticker %}">Details</a>
                     </div>
                 </li>
             {% empty %}
@@ -81,18 +139,18 @@
         </ul>
     </div>
 
+    <!-- Footer -->
     <footer>
         <p>&copy; 2024 StockVision</p>
     </footer>
 
+    <!-- JavaScript for Remove Button -->
     <script>
         document.querySelectorAll('.remove-btn').forEach(button => {
             button.addEventListener('click', async function () {
                 const stockId = this.dataset.stockId;
                 const stockItem = document.getElementById(`stock-${stockId}`);
-        
-                console.log(`Removing stock: ${stockId}`); // Log the stock ID for debugging
-        
+
                 try {
                     const response = await fetch(`/watchlist/remove/${stockId}/`, {
                         method: 'POST',
@@ -101,17 +159,15 @@
                             'Content-Type': 'application/json',
                         },
                     });
-        
+
                     if (!response.ok) {
-                        console.error(`Failed: ${response.status}`);
                         throw new Error(`HTTP status ${response.status}`);
                     }
-        
+
                     const data = await response.json();
-                    console.log('Response:', data); // Log response
-        
+
                     if (data.status === 'success') {
-                        stockItem.remove(); // Dynamically remove the stock
+                        stockItem.remove(); // Remove stock dynamically
                     } else {
                         alert(data.message || 'Failed to remove the stock.');
                     }
@@ -120,7 +176,7 @@
                     alert('Failed to remove the stock. Please try again.');
                 }
             });
-        });                  
-    </script>    
+        });
+    </script>
 </body>
 </html>

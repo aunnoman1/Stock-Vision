@@ -1,38 +1,230 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     {% load static %}
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Search Results</title>
     <link rel="stylesheet" href="{% static 'styles.css' %}">
+    <style>
+        /* Global Styles */
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f2f5;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+        }
+
+        /* Header Styling */
+        header {
+            background-color: #0b3954; /* Dark blue */
+            width: 100%;
+            text-align: center;
+            padding: 15px 0;  /* Reduced vertical padding */
+            color: #ffffff;  /* White text for better contrast */
+        }
+
+        header h1 {
+            font-size: 2.5rem;  /* Adjusted size for compactness */
+            margin: 0;
+            font-weight: bold;
+            color: #7d7d7d; /* Grey color for "Stock-Vision" */
+        }
+
+        header p {
+            font-size: 1.2rem;
+            margin-top: 5px;  /* Reduced space between title and subtitle */
+            color: #e0e0e0;  /* Lighter color for subtitle */
+        }
+
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        h1 {
+            font-size: 2rem;
+            color: #0b3954; /* Dark blue */
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        p {
+            font-size: 1rem;
+            margin-bottom: 20px;
+            color: #555;
+        }
+
+        strong {
+            color: #0b3954; /* Dark blue */
+        }
+
+        /* Scrollable List */
+        .results-list {
+            max-height: 300px;
+            overflow-y: auto;
+            margin-bottom: 20px;
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        li {
+            margin-bottom: 10px;
+        }
+
+        a {
+            text-decoration: none;
+            color: #0b3954;
+            font-size: 1.1rem;
+            font-weight: bold;
+            transition: color 0.3s ease, text-decoration 0.3s ease;
+        }
+
+        a:hover {
+            color: #0a3146; /* Darker blue */
+            text-decoration: underline;
+        }
+
+        /* Pagination Controls */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .pagination a {
+            padding: 8px 16px;
+            background-color: #0b3954;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+            transition: background-color 0.3s ease;
+        }
+
+        .pagination a:hover {
+            background-color: #0a3146;
+        }
+
+        /* Button Styles */
+        .btn {
+            display: inline-block;
+            padding: 12px 20px;
+            background-color: #0b3954;
+            color: white;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 1rem;
+            margin-top: 20px;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+
+        .btn:hover {
+            background-color: #0a3146;
+            transform: translateY(-2px);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 1.5rem;
+            }
+
+            header h1 {
+                font-size: 2rem;
+            }
+
+            header p {
+                font-size: 1rem;
+            }
+
+            .container {
+                padding: 20px;
+            }
+
+            .btn {
+                padding: 10px 15px;
+            }
+
+            .pagination a {
+                font-size: 0.9rem;
+                padding: 6px 12px;
+            }
+        }
+    </style>
 </head>
+
 <body>
+    <!-- Header Section -->
+    <header>
+        <h1>Stock-Vision</h1>
+        <p>See the future of your investments</p>
+    </header>
+
+    <!-- Main Content -->
     <div class="container">
         <h1>Search Results</h1>
-        
+
         <!-- Display the search query -->
         <p>Results for: <strong>{{ query }}</strong></p>
 
         <!-- Check if any stocks are returned -->
         {% if stocks %}
-            <ul>
-                <!-- Loop through the stocks and display them as links -->
-                {% for stock in stocks %}
-                    <li>
-                        <a href="{% url 'stock_detail' stock.ticker %}">
-                            {{ stock.name }} ({{ stock.ticker }})
-                        </a>
-                    </li>
-                {% endfor %}
-            </ul>
+            <!-- Scrollable results container -->
+            <div class="results-list">
+                <ul>
+                    <!-- Loop through the stocks and display them as links -->
+                    {% for stock in stocks %}
+                        <li>
+                            <a href="{% url 'stock_detail' stock.ticker %}">
+                                {{ stock.name }} ({{ stock.ticker }})
+                            </a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+
+            <!-- Pagination controls -->
+            <div class="pagination">
+                {% if page_obj.has_previous %}
+                    <a href="?page=1">First</a>
+                    <a href="?page={{ page_obj.previous_page_number }}">Previous</a>
+                {% endif %}
+
+                <span>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+
+                {% if page_obj.has_next %}
+                    <a href="?page={{ page_obj.next_page_number }}">Next</a>
+                    <a href="?page={{ page_obj.paginator.num_pages }}">Last</a>
+                {% endif %}
+            </div>
         {% else %}
             <!-- Message when no results are found -->
             <p>No stocks found for your search.</p>
         {% endif %}
-        
+
         <!-- Add a button to return to the home page -->
         <a href="{% url 'homepage' %}" class="btn">Home</a>
     </div>
 </body>
+
 </html>
