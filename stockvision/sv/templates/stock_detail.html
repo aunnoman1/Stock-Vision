@@ -14,53 +14,64 @@
             background-color: #f0f2f5;
             color: #333;
         }
+
+        header {
+            background-color: #0b3954;
+            width: 100%;
+            text-align: center;
+            padding: 15px 0;
+            color: #ffffff;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            margin: 0;
+            font-weight: bold;
+        }
+
+        header p {
+            font-size: 1.2rem;
+            margin-top: 5px;
+            color: #e0e0e0;
+        }
+
         .container {
             max-width: 800px;
             margin: 0 auto;
             padding: 20px;
             text-align: center;
         }
-        .header {
-            font-size: 2rem;
-            font-weight: bold;
-            color: #0b3954;
-        }
-        .current-price {
-            font-size: 1.5rem;
-            color: #0b3954;
-            margin-top: 10px;
-        }
-        .price-summary {
-            margin-top: 20px;
-            font-size: 1.2rem;
-        }
+
         .price-table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 20px;
+            margin: 20px auto;
+            text-align: center;
         }
+
         .price-table th, .price-table td {
             padding: 10px;
             border: 1px solid #ddd;
-            text-align: center;
         }
+
         .price-table th {
             background-color: #0b3954;
             color: white;
         }
+
         .price-table tr:nth-child(even) {
             background-color: #f2f2f2;
         }
 
-        /* Scroll Buttons Styling */
         .scroll-buttons {
             position: fixed;
-            top: 20px;
+            top: 150px; 
             left: 20px;
             display: flex;
             flex-direction: column;
             gap: 10px;
         }
+        
 
         .scroll-buttons a {
             padding: 10px;
@@ -73,9 +84,20 @@
         }
 
         .scroll-buttons a:hover {
-            background-color: #093d59;
+            background-color: #093d59;    
         }
     </style>
+
+    <!-- Load Chart.js from CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.1/chart.min.js"></script>
+</head>
+<body>
+
+    <!-- Header Section -->
+    <header>
+        <h1>Stock-Vision</h1>
+        <p>See the future of your investments</p>
+    </header>
 
     <!-- Load Chart.js from CDN -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.1/chart.min.js"></script>
@@ -86,7 +108,6 @@
         <a href="#top">Go to Start</a>
         <a href="#recent-posts">Go to Posts</a>
         <a href="#time-span-buttons">Go to Graph</a>
-        <a href="#price-table">Go to Price Table</a>
     </div>
 
     <!-- Watchlist Buttons (Top Right) -->
@@ -188,20 +209,23 @@
     
     <!-- Basic Details -->
     <div class="container">
-        <h1 class="header">{{ stock_data.name }} ({{ stock_data.ticker }})</h1>
-
-        {% if latest_price %}
-            <p class="current-price">Current Price: ${{ latest_price.close }}</p>
-        {% else %}
-            <p class="current-price">Current Price: Not available</p>
-        {% endif %}
-
-        <p><strong>Predicted Price:</strong> ${{ stock_data.prediction }}</p>
-
-        <div class="price-summary">
-            <p>Highest Price in last 6 months: ${{ max_price }}</p>
-            <p style="margin-bottom: 50px;">Lowest Price in last 6 months: ${{ min_price }}</p>
-        </div>
+        <h1>{{ stock_data.name }} ({{ stock_data.ticker }})</h1>
+        <table class="price-table">
+            <thead>
+                <tr>
+                    <th>Predicted Price</th>
+                    <th>Highest Price (Last 6 Months)</th>
+                    <th>Lowest Price (Last 6 Months)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>${{ stock_data.prediction }}</td>
+                    <td>${{ max_price }}</td>
+                    <td>${{ min_price }}</td>
+                </tr>
+            </tbody>
+        </table>
 
         <!-- show recent 5 posts-->
         <div id="recent-posts" class="recent-posts" style="margin-top: 40px;">
@@ -347,31 +371,6 @@
         plotChart(filteredData, timeSpan);
     }             
         </script>             
-        
-        <!-- Price Data Table -->
-        <p><strong>Price Data Table:</strong> Below is the historical price data for {{ stock_data.name }} over the selected time period.</p>
-        <table id="price-table" class="price-table">
-            <thead>
-                <tr>
-                    <th>Date</th>
-                    <th>Open</th>
-                    <th>High</th>
-                    <th>Low</th>
-                    <th>Close</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for price in stock_prices %}
-                <tr>
-                    <td>{{ price.date }}</td>
-                    <td>${{ price.open }}</td>
-                    <td>${{ price.high }}</td>
-                    <td>${{ price.low }}</td>
-                    <td>${{ price.close }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
         
     </div>
 </body>

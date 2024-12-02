@@ -168,6 +168,7 @@
         <a href="{% if user.is_authenticated %}{% url 'userwatchlist' %}{% else %}{% url 'login' %}{% endif %}" class="button">Watchlist</a>
         <a class="button">Request Stock</a>
         <a href="{% url 'compare_selector' %}" class="button">Compare Stocks</a>
+        <a href="{% url 'select_sector' %}" class="button">View by Sector</a>
         <a class="button">About Us</a>
         <a href="{% url 'login' %}" class="button">Log In</a> 
             <a href="{% url 'logout' %}" class="button">Log Out</a>     
@@ -188,12 +189,15 @@
         <div class="trending-section">
             <h2 class="trending-header">Trending Stocks</h2>
             <ul class="stock-list">
-                <li class="stock-item"><a href="{% url 'stock_detail' symbol='AAPL' %}">AAPL - Apple Inc.</a></li>
-                <li class="stock-item"><a href="{% url 'stock_detail' symbol='TSLA' %}">TSLA - Tesla, Inc.</a></li>
-                <li class="stock-item"><a href="{% url 'stock_detail' symbol='GOOGL' %}">GOOGL - Alphabet Inc.</a></li>
-                <li class="stock-item"><a href="{% url 'stock_detail' symbol='AMZN' %}">AMZN - Amazon.com, Inc.</a></li>
-                <li class="stock-item"><a href="{% url 'stock_detail' symbol='MSFT' %}">MSFT - Microsoft Corporation</a></li>
-            </ul>
+                {% for price in trending_stocks %}
+                <li class="stock-item">
+                    <a href="{% url 'stock_detail' symbol=price.stock.ticker %}">
+                        {{ price.stock.ticker }} - {{ price.stock.name }}
+                    </a> 
+                </li>
+                {% empty %}
+                <li>No trending stocks available.</li>
+                {% endfor %}
         </div>
     </div>
 

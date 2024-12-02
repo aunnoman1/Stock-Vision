@@ -19,4 +19,6 @@ urlpatterns = [
     path('remove_from_watchlist/<int:stock_id>/', views.remove_from_watchlist, name='remove_from_watchlist'),
     path('watchlist/remove/<int:stock_id>/', views.remove_from_watchlist, name='remove_from_watchlist'),
     path('watchlist/stock/<str:symbol>/', views.stock_detail, name='stock_detail'),
+    path('select_sector/', views.select_sector, name='select_sector'),
+    path('sector_stocks/', views.sector_stocks, name='sector_stocks'),
 ]
