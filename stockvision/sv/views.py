@@ -17,18 +17,6 @@ from django.views.decorators.csrf import csrf_exempt
 from django import forms
 from .models import Request
 import json
-logger = logging.getLogger(__name__)
-
-from django.shortcuts import render
-from .models import Price
-
-def homepage_view(request):
-    latest_date = Price.objects.latest('date').date
-    trending_stocks = Price.objects.filter(date=latest_date).order_by('-volume')[:5]
-    context = {
-        'trending_stocks': trending_stocks,
-    }
-    return render(request, 'home.html', context)
 
 def stock_detail(request, symbol):
     stock = get_object_or_404(Stock, ticker=symbol)
@@ -112,6 +100,58 @@ def userwatchlist(request):
         'user': request.user
     })
 
+@login_required
+def add_to_watchlist(request, stock_id):
+    if request.method == "POST":
+        stock = get_object_or_404(Stock, id=stock_id)
+        watchlist, created = Watchlist.objects.get_or_create(user=request.user)
+        if stock not in watchlist.stocks.all():
+            watchlist.stocks.add(stock)
+            return JsonResponse({"message": "Stock added to watchlist!", "status": "success"})
+        return JsonResponse({"message": "Stock is already in the watchlist.", "status": "info"}) 
+    return JsonResponse({"error": "Invalid request."}, status=400)
+
+@login_required
+def remove_from_watchlist(request, stock_id):
+    try:
+        stock = get_object_or_404(Stock, id=stock_id)
+        watchlist = Watchlist.objects.filter(user=request.user).first()
+        if not watchlist:
+            return JsonResponse({"message": "No watchlist found.", "status": "error"}, status=404)
+        if stock in watchlist.stocks.all():
+            watchlist.stocks.remove(stock)
+            return JsonResponse({"message": "Stock removed successfully.", "status": "success"})
+        else:
+            return JsonResponse({"message": "Stock not in watchlist.", "status": "info"})
+
+    except Exception as e:
+        return JsonResponse({"message": "An error occurred while removing the stock.", "status": "error"}, status=500)
+
+def select_sector(request):
+    sectors = Stock.objects.values_list('sector', flat=True).distinct()
+    return render(request, 'select_sector.html', {'sectors': sectors})
+
+def sector_stocks(request):
+    selected_sector = request.GET.get('sector')
+    
+    stocks = Stock.objects.filter(sector=selected_sector)
+
+    stocks_with_prices = []
+    for stock in stocks:
+        latest_price = Price.objects.filter(stock=stock).order_by('-date').first()
+        stocks_with_prices.append({
+            'stock': stock,
+            'latest_price': latest_price,
+        })
+
+
+    
+
+    return render(request, 'sector_stocks.html', {
+        'sector': selected_sector,
+        'stocks_with_prices': stocks_with_prices
+    })
+#-----------------------------
 def userdetails(request):
     return render(request, 'userdetails.html', {'user': request.user})
 
@@ -159,56 +199,21 @@ def logout_view(request):
     
     return redirect('login')#donee
 
-@login_required
-def add_to_watchlist(request, stock_id):
-    if request.method == "POST":
-        stock = get_object_or_404(Stock, id=stock_id)
-        watchlist, created = Watchlist.objects.get_or_create(user=request.user)
-
-        if stock not in watchlist.stocks.all():
-            watchlist.stocks.add(stock)
-            logger.info(f"Added {stock.ticker} to {request.user.username}'s watchlist.")  
-            return JsonResponse({"message": "Stock added to watchlist!", "status": "success"})
-        logger.info(f"{stock.ticker} already in {request.user.username}'s watchlist.")  
-        return JsonResponse({"message": "Stock is already in the watchlist.", "status": "info"})
-    logger.error("Invalid request method.")  
-    return JsonResponse({"error": "Invalid request."}, status=400)
-
-@login_required
-def remove_from_watchlist(request, stock_id):
-    logger.info(f"Request received to remove stock ID {stock_id} for user {request.user}.")
-    
-    try:
-        stock = get_object_or_404(Stock, id=stock_id)
-        logger.info(f"Found stock: {stock.ticker}")
-
-        watchlist = Watchlist.objects.filter(user=request.user).first()
-        if not watchlist:
-            logger.warning(f"No watchlist found for user {request.user}.")
-            return JsonResponse({"message": "No watchlist found.", "status": "error"}, status=404)
-
-        if stock in watchlist.stocks.all():
-            watchlist.stocks.remove(stock)
-            logger.info(f"Removed stock {stock.ticker} from watchlist for user {request.user}.")
-            return JsonResponse({"message": "Stock removed successfully.", "status": "success"})
-        else:
-            logger.info(f"Stock {stock.ticker} not found in watchlist for user {request.user}.")
-            return JsonResponse({"message": "Stock not in watchlist.", "status": "info"})
-
-    except Exception as e:
-        logger.error(f"Error while removing stock {stock_id}: {e}", exc_info=True)
-        return JsonResponse({"message": "An error occurred while removing the stock.", "status": "error"}, status=500)
+def homepage_view(request):
+    latest_date = Price.objects.latest('date').date
+    trending_stocks = Price.objects.filter(date=latest_date).order_by('-volume')[:5]
+    context = {
+        'trending_stocks': trending_stocks,
+    }
+    return render(request, 'home.html', context)
 
 def compare_stocks(request):
     stock = get_object_or_404(Stock, ticker=request.GET.get('symbol'))
     compare_stock = get_object_or_404(Stock, ticker=request.GET.get('compare-symbol'))
+    latest_price = stock.prices.order_by('-date').first()
+    stock_prices = stock.prices.order_by('date')[:100]
 
-    stock_prices_queryset = stock.prices.order_by('-date')[:100]
-    stock_prices = list(stock_prices_queryset)[::-1]  
-
-    latest_price = stock_prices[-1] if stock_prices else None  
-
-    if stock_prices:
+    if stock_prices.exists():
         min_price = min(price.low for price in stock_prices)
         max_price = max(price.high for price in stock_prices)
     else:
@@ -223,16 +228,13 @@ def compare_stocks(request):
     }
 
 
-    compare_stock_prices_queryset = compare_stock.prices.order_by('-date')[:100]
-    compare_stock_prices = list(compare_stock_prices_queryset)[::-1]
+    
+    compare_latest_price = compare_stock.prices.order_by('-date').first()
+    compare_stock_prices = compare_stock.prices.order_by('date')[:100]
 
-    compare_latest_price = compare_stock_prices[-1] if compare_stock_prices else None
-
-    if compare_stock_prices:
+    if compare_stock_prices.exists():
         compare_min_price = min(price.low for price in compare_stock_prices)
         compare_max_price = max(price.high for price in compare_stock_prices)
-    else:
-        compare_min_price = compare_max_price = None
 
     compare_chart_data = {
         'dates': [price.date.strftime('%Y-%m-%d') for price in compare_stock_prices],
@@ -263,32 +265,6 @@ def compare_selector(request):
     return render(request, 'compare-selector.html', {
         'stocks': stocks,
     })
-
-def select_sector(request):
-    sectors = Stock.objects.values_list('sector', flat=True).distinct()
-    return render(request, 'select_sector.html', {'sectors': sectors})
-
-def sector_stocks(request):
-    selected_sector = request.GET.get('sector')
-    
-    stocks = Stock.objects.filter(sector=selected_sector)
-
-    stocks_with_prices = []
-    for stock in stocks:
-        latest_price = Price.objects.filter(stock=stock).order_by('-date').first()
-        stocks_with_prices.append({
-            'stock': stock,
-            'latest_price': latest_price,
-        })
-
-
-    
-
-    return render(request, 'sector_stocks.html', {
-        'sector': selected_sector,
-        'stocks_with_prices': stocks_with_prices
-    })
-
 
 def request_stock(request):
     if request.method == 'POST':
