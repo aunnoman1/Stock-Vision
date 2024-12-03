@@ -102,7 +102,7 @@ def analyze_sentiment(text):
 def get_aggregated_stock_posts(subreddits, stocks, max_posts_per_stock=None):
     for subreddit in subreddits:
         print(f"Fetching posts from r/{subreddit}")
-        stock_posts = fetch_reddit_posts(subreddit, stocks, max_posts_per_stock, before, after)
+        stock_posts = fetch_reddit_posts(subreddit, stocks, max_posts_per_stock)
         
         for i, stock in enumerate(stocks):
             print(f"Processing stock: {TICKERS[i]}")
@@ -149,8 +149,6 @@ def save_post(stock_obj, author, created_time, sentiment, pos_sentiment, neg_sen
     p.save()
 # Django command to execute the script
 class Command(BaseCommand):
-    def add_arguments(self, parser):
-        parser.add_argument('before', type=str, help='Date in YYYY-MM-DD format')
-        parser.add_argument('after', type=str, help='Date in YYYY-MM-DD format')
+
     def handle(self, *args, **kwargs):
         get_aggregated_stock_posts(SUBREDDITS, STOCKS, max_posts_per_stock=1000)
