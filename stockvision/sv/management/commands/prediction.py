@@ -31,8 +31,8 @@ class Command(BaseCommand):
             
             # Fetch the last 20 days of price data
             recent_prices = Price.objects.filter(stock=stock).order_by('-date')[:21]
-            print(recent_prices)
-            if len(recent_prices) < 20:
+            if len(recent_prices) < 21:
+                print(len(recent_prices))
                 self.stdout.write(f"Not enough price data for {stock.ticker}. Skipping.")
                 continue
 
@@ -85,6 +85,7 @@ class Command(BaseCommand):
             # Merge price and sentiment data
             price_data['Date'] = pd.to_datetime(price_data['date']).dt.date
             merged_df = pd.merge(price_data, combined_sentiments, on='Date', how='left')
+            #print(merged_df.shape)
             merged_df.fillna(float(0.333333), inplace=True)
 
             #print(merged_df.info())
@@ -109,6 +110,7 @@ class Command(BaseCommand):
             X.append(input_sequence)
             X = np.array(X)
             if X.shape[1] < 20:
+                #print(X.shape)
                 self.stdout.write(f"Insufficient feature data for {stock.ticker}. Skipping.")
                 continue
 
