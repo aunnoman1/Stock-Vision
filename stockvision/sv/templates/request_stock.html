@@ -6,30 +6,54 @@
     <title>Request Stock</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
+            font-family: 'Roboto', sans-serif;
             margin: 0;
             padding: 0;
+            background-color: #f0f2f5;
+            color: #333;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
-            background-color: #f3f3f3;
+            height: 100vh; /* Full viewport height */
+            flex-direction: column;
         }
 
-        h1 {
+        header {
+            background-color: #0b3954;
+            width: 100%; /* Full width */
             text-align: center;
-            color: #5a2d8c; /* Purple color */
-            margin-bottom: 20px;
+            padding: 15px 0;
+            color: #ffffff;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            margin: 0;
+            font-weight: bold;
+        }
+
+        header p {
+            font-size: 1.2rem;
+            margin-top: 5px;
+            color: #e0e0e0;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            text-align: center;
         }
 
         form {
             background-color: #fff;
-            width: 300px;
+            width: 100%;
+            max-width: 350px; /* Set max width for form */
             padding: 20px;
             border-radius: 8px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            text-align: center;
+            text-align: left; /* Align text to the left for form elements */
+            margin: 0 auto; /* Center form */
         }
 
         label {
@@ -42,10 +66,11 @@
         input {
             width: 100%;
             padding: 10px;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
             border: 1px solid #ccc;
             border-radius: 4px;
             font-size: 14px;
+            box-sizing: border-box; /* Ensures padding doesn't affect width */
         }
 
         button {
@@ -72,20 +97,24 @@
             color: green;
             font-size: 18px;
         }
-
     </style>
 </head>
 <body>
-    <div>
+    <header>
+        <h1>Stock-Vision</h1>
+        <p>See the future of your investments</p>
+    </header>
+    
+    <div class="container">
         <h1>Request a Stock</h1>
         
         <form method="POST">
             {% csrf_token %}
             <label for="req_name">Request Name:</label>
-            <input type="text" id="req_name" name="req_name" required><br><br>
+            <input type="text" id="req_name" name="req_name" required>
             
             <label for="ticker">Stock Ticker:</label>
-            <input type="text" id="ticker" name="ticker" required><br><br>
+            <input type="text" id="ticker" name="ticker" required>
             
             <button type="submit">Submit Request</button>
         </form>

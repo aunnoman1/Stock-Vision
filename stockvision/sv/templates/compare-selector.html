@@ -16,8 +16,30 @@
             display: flex;
             justify-content: center;
             align-items: center;
+            flex-direction: column;
             height: 100vh;
         }
+
+        header {
+            background-color: #0b3954;
+            width: 100%;
+            text-align: center;
+            padding: 15px 0;
+            color: #ffffff;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            margin: 0;
+            font-weight: bold;
+        }
+
+        header p {
+            font-size: 1.2rem;
+            margin-top: 5px;
+            color: #e0e0e0;
+        }
+
         .form-container {
             background-color: white;
             padding: 20px;
@@ -25,20 +47,25 @@
             box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
             max-width: 400px;
             width: 100%;
+            margin-top: 30px;
         }
+
         .form-container h1 {
             font-size: 1.5rem;
             margin-bottom: 20px;
             text-align: center;
         }
+
         .form-group {
             margin-bottom: 15px;
         }
+
         label {
             display: block;
             margin-bottom: 5px;
             font-weight: bold;
         }
+
         select {
             width: 100%;
             padding: 10px;
@@ -46,6 +73,7 @@
             border-radius: 5px;
             font-size: 1rem;
         }
+
         button {
             width: 100%;
             padding: 10px;
@@ -56,17 +84,23 @@
             font-size: 1rem;
             cursor: pointer;
         }
+
         button:hover {
             background-color: #0a3146;
         }
     </style>
 </head>
 <body>
+    <header>
+        <h1>Stock-Vision</h1>
+        <p>See the future of your investments</p>
+    </header>
+    
     <div class="form-container">
         <h1>Compare Two Stocks</h1>
-        <form action="{% url 'compare_stocks' %}" method="get">
+        <form id="compare-form" action="{% url 'compare_stocks' %}" method="get">
             <div class="form-group">
-                <label for="stock1">Select First Stock:</label>
+                <label for="symbol">Select First Stock:</label>
                 <select id="symbol" name="symbol">
                     <option value="" disabled selected>Choose a stock</option>
                     {% for stock in stocks %}
@@ -75,7 +109,7 @@
                 </select>
             </div>
             <div class="form-group">
-                <label for="stock2">Select Second Stock:</label>
+                <label for="compare-symbol">Select Second Stock:</label>
                 <select id="compare-symbol" name="compare-symbol">
                     <option value="" disabled selected>Choose a stock</option>
                     {% for stock in stocks %}
@@ -86,5 +120,17 @@
             <button type="submit">Compare</button>
         </form>
     </div>
+
+    <script>
+        document.getElementById('compare-form').addEventListener('submit', function (e) {
+            const firstStock = document.getElementById('symbol').value;
+            const secondStock = document.getElementById('compare-symbol').value;
+
+            if (!firstStock || !secondStock) {
+                e.preventDefault();
+                alert('Please select two stocks to compare.');
+            }
+        });
+    </script>
 </body>
 </html>
