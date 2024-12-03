@@ -104,7 +104,7 @@ def userwatchlist(request):
 def add_to_watchlist(request, stock_id):
     if request.method == "POST":
         stock = get_object_or_404(Stock, id=stock_id)
-        watchlist, created = Watchlist.objects.get_or_create(user=request.user)
+        watchlist, _ = Watchlist.objects.get_or_create(user=request.user)
         if stock not in watchlist.stocks.all():
             watchlist.stocks.add(stock)
             return JsonResponse({"message": "Stock added to watchlist!", "status": "success"})
@@ -124,7 +124,7 @@ def remove_from_watchlist(request, stock_id):
         else:
             return JsonResponse({"message": "Stock not in watchlist.", "status": "info"})
 
-    except Exception as e:
+    except Exception as _:
         return JsonResponse({"message": "An error occurred while removing the stock.", "status": "error"}, status=500)
 
 def select_sector(request):
