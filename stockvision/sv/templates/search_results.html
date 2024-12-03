@@ -6,9 +6,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Search Results</title>
-    <link rel="stylesheet" href="{% static 'styles.css' %}">
     <style>
-        /* Global Styles */
         body {
             font-family: 'Roboto', sans-serif;
             margin: 0;
@@ -23,24 +21,24 @@
 
         /* Header Styling */
         header {
-            background-color: #0b3954; /* Dark blue */
+            background-color: #0b3954;
             width: 100%;
             text-align: center;
-            padding: 15px 0;  /* Reduced vertical padding */
-            color: #ffffff;  /* White text for better contrast */
+            padding: 15px 0;  
+            color: #ffffff; 
         }
 
         header h1 {
-            font-size: 2.5rem;  /* Adjusted size for compactness */
+            font-size: 2.5rem;  
             margin: 0;
             font-weight: bold;
-            color: #7d7d7d; /* Grey color for "Stock-Vision" */
+            color: #7d7d7d; 
         }
 
         header p {
             font-size: 1.2rem;
-            margin-top: 5px;  /* Reduced space between title and subtitle */
-            color: #e0e0e0;  /* Lighter color for subtitle */
+            margin-top: 5px;  
+            color: #e0e0e0;  
         }
 
         .container {
@@ -56,7 +54,7 @@
 
         h1 {
             font-size: 2rem;
-            color: #0b3954; /* Dark blue */
+            color: #0b3954;
             margin-bottom: 20px;
             text-transform: uppercase;
             letter-spacing: 1px;
@@ -69,10 +67,9 @@
         }
 
         strong {
-            color: #0b3954; /* Dark blue */
+            color: #0b3954;
         }
 
-        /* Scrollable List */
         .results-list {
             max-height: 300px;
             overflow-y: auto;
@@ -97,11 +94,10 @@
         }
 
         a:hover {
-            color: #0a3146; /* Darker blue */
+            color: #0a3146; 
             text-decoration: underline;
         }
 
-        /* Pagination Controls */
         .pagination {
             display: flex;
             justify-content: center;
@@ -123,7 +119,6 @@
             background-color: #0a3146;
         }
 
-        /* Button Styles */
         .btn {
             display: inline-block;
             padding: 12px 20px;
@@ -143,7 +138,6 @@
             transform: translateY(-2px);
         }
 
-        /* Responsive Design */
         @media (max-width: 600px) {
             h1 {
                 font-size: 1.5rem;
@@ -182,17 +176,11 @@
 
     <!-- Main Content -->
     <div class="container">
-        <h1>Search Results</h1>
+        <h1>Results for: <strong>{{ query }}</strong></h1>
 
-        <!-- Display the search query -->
-        <p>Results for: <strong>{{ query }}</strong></p>
-
-        <!-- Check if any stocks are returned -->
         {% if stocks %}
-            <!-- Scrollable results container -->
             <div class="results-list">
                 <ul>
-                    <!-- Loop through the stocks and display them as links -->
                     {% for stock in stocks %}
                         <li>
                             <a href="{% url 'stock_detail' stock.ticker %}">
@@ -203,14 +191,13 @@
                 </ul>
             </div>
 
-            <!-- Pagination controls -->
             <div class="pagination">
                 {% if page_obj.has_previous %}
                     <a href="?page=1">First</a>
                     <a href="?page={{ page_obj.previous_page_number }}">Previous</a>
                 {% endif %}
 
-                <span>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+                <span>{{ page_obj.number }} {{ page_obj.paginator.num_pages }}</span>
 
                 {% if page_obj.has_next %}
                     <a href="?page={{ page_obj.next_page_number }}">Next</a>
@@ -218,11 +205,9 @@
                 {% endif %}
             </div>
         {% else %}
-            <!-- Message when no results are found -->
             <p>No stocks found for your search.</p>
         {% endif %}
 
-        <!-- Add a button to return to the home page -->
         <a href="{% url 'homepage' %}" class="btn">Home</a>
     </div>
 </body>
