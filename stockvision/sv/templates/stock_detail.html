@@ -236,7 +236,16 @@
                         <li style="margin-bottom: 20px; padding: 10px; border: 1px solid #ddd; border-radius: 5px; background-color: #fff;">
                             <p><strong>Author:</strong> {{ post.author }}</p>
                             <p><strong>Posted:</strong> {{ post.time|date:"F j, Y, g:i a" }}</p>
-                            <p><strong>Sentiment:</strong> {{ post.sentiment }}</p>
+                            <p><strong>Sentiment:</strong> {{ post.sentiment }}
+                                {% if post.sentiment < -0.05 %}
+                                <p><strong>Sentiment Status:</strong> Negative</p>
+                              {% elif post.sentiment > 0.05 %}
+                                <p><strong>Sentiment Status:</strong> Positive</p>
+                              {% else %}
+                                <p><strong>Sentiment Status:</strong> Neutral</p>
+                              {% endif %}
+                              </p>
+
                             <p><strong>Text:</strong> {{ post.text }}</p>
                         </li>
                     {% endfor %}

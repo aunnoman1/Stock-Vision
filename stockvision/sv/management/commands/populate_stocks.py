@@ -14,7 +14,7 @@ STOCK_SYMBOLS = [
             'NVDA', 'TSLA', 'AAPL', 'META', 'MSFT', 'AMZN', 'AMD',
             'AVGO', 'PLTR', 'MSTR', 'XOM', 'MU', 'JPM', 'GOOG',
             'CRM', 'LLY', 'VST', 'HD', 'NFLX', 'UNH', 'BAC', 
-            'COST', 'SMCI', 'CVX', 'V', 'COIN'
+            'COST', 'SMCI', 'CVX', 'V', 'COIN', 'INTC', 'QCOM','CEG',
         ]
 class Command(BaseCommand):
     help = 'Populate the database with stock data such as name, description, and sector'
@@ -40,7 +40,7 @@ class Command(BaseCommand):
 
                 if name and ticker:
                     # Save the stock data to your database
-                    stock, created = Stock.objects.get_or_create(
+                    _, created = Stock.objects.get_or_create(
                         ticker=ticker,
                         defaults={
                             'name': name,
