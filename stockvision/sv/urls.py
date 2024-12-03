@@ -21,4 +21,5 @@ urlpatterns = [
     path('watchlist/stock/<str:symbol>/', views.stock_detail, name='stock_detail'),
     path('select_sector/', views.select_sector, name='select_sector'),
     path('sector_stocks/', views.sector_stocks, name='sector_stocks'),
+    path('request-stock/', views.request_stock, name='request_stock'),
 ]
