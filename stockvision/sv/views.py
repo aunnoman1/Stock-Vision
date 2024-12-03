@@ -16,7 +16,7 @@ import logging
 from django.views.decorators.csrf import csrf_exempt
 from django import forms
 from .models import Request
-
+import json
 logger = logging.getLogger(__name__)
 
 from django.shortcuts import render
@@ -33,6 +33,8 @@ def homepage_view(request):
 def stock_detail(request, symbol):
     stock = get_object_or_404(Stock, ticker=symbol)
     latest_price = stock.prices.order_by('-date').first()
+    
+    # Handle time span for price data
     time_span = request.GET.get('time_span', '6m')
 
     if time_span == '1w':
@@ -54,6 +56,7 @@ def stock_detail(request, symbol):
     else:
         min_price = max_price = None
 
+    # Prepare chart data
     chart_data = {
         'dates': [price.date.strftime('%Y-%m-%d') for price in stock_prices],
         'open_prices': [float(price.open) for price in stock_prices],
@@ -61,6 +64,9 @@ def stock_detail(request, symbol):
         'high_prices': [float(price.high) for price in stock_prices],
         'low_prices': [float(price.low) for price in stock_prices],
     }
+    chart_data_json = json.dumps(chart_data)
+
+    # Retrieve the 5 most recent posts for the stock
     recent_posts = stock.posts.all().order_by('-time')[:5]
 
     return render(request, 'stock_detail.html', {
@@ -69,9 +75,9 @@ def stock_detail(request, symbol):
         'stock_prices': stock_prices,
         'min_price': min_price,
         'max_price': max_price,
-        'chart_data': chart_data,
+        'chart_data_json': chart_data_json,
         'time_span': time_span,
-        'recent_posts': recent_posts,  
+        'recent_posts': recent_posts,
     })
 
 def search_stocks(request):

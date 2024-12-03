@@ -99,7 +99,6 @@
         <p>See the future of your investments</p>
     </header>
 
-    <!-- Load Chart.js from CDN -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.1/chart.min.js"></script>
 </head>
 <body>
@@ -191,11 +190,11 @@
                     if (data.message) {
                         popupMessage.textContent = data.message;
                         popup.style.display = "block";
-                        popup.style.backgroundColor = "red"; // Red background for removing stock
+                        popup.style.backgroundColor = "red"; 
                     } else if (data.error) {
                         popupMessage.textContent = data.error;
                         popup.style.display = "block";
-                        popup.style.backgroundColor = "red"; // Red background for errors
+                        popup.style.backgroundColor = "red"; 
                     }
                 })
                 .catch(error => {
@@ -213,6 +212,7 @@
         <table class="price-table">
             <thead>
                 <tr>
+                    <th>Current Price</th>
                     <th>Predicted Price</th>
                     <th>Highest Price (Last 6 Months)</th>
                     <th>Lowest Price (Last 6 Months)</th>
@@ -220,6 +220,7 @@
             </thead>
             <tbody>
                 <tr>
+                    <td>${{ latest_price.close }}</td>
                     <td>${{ stock_data.prediction }}</td>
                     <td>${{ max_price }}</td>
                     <td>${{ min_price }}</td>
@@ -259,7 +260,6 @@
         <script src="https://cdn.jsdelivr.net/npm/plotly.js-dist@2.16.1/plotly.min.js"></script>
         <script>
             const defaultTimeSpan = '6m';  
-        // Define the initial chart data (directly from template context)
         const chartData = JSON.parse('{{ chart_data_json|escapejs }}');
 
             // Function to filter out weekends (Saturday=5, Sunday=6)
@@ -274,7 +274,7 @@
             
                 for (let i = 0; i < data.dates.length; i++) {
                     const date = new Date(data.dates[i]);
-                    // Only add dates that fall on weekdays (Monday=1 through Friday=5)
+                    //Only add dates that fall on weekdays (Monday=1 through Friday=5)
                     if (date.getDay() >= 1 && date.getDay() <= 5) {
                         filteredData.dates.push(data.dates[i]);
                         filteredData.close_prices.push(data.close_prices[i]);
@@ -287,7 +287,6 @@
                 return filteredData;
             }        
 
-            // Function to plot the chart
             function plotChart(data, timeSpan) {
                 const trace = {
                     x: data.dates,
@@ -300,8 +299,6 @@
                     increasing: { line: { color: 'green' } },
                     decreasing: { line: { color: 'red' } }
                 };
-            
-                // Determine the interval based on the selected time span
                 let tickInterval;
                 let tickFormat;
             
@@ -338,11 +335,9 @@
             const filteredChartData = filterWeekends(chartData);
             plotChart(filteredChartData, defaultTimeSpan);
 
-        // Update chart based on selected time span
     function updateGraph(timeSpan) {
         let days;
 
-        // Define the number of trading days based on the selected time span
         if (timeSpan === '1w') {
             days = 5; 
         } else if (timeSpan === '1m') {
