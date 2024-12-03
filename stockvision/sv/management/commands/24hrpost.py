@@ -40,7 +40,7 @@ def fetch_reddit_posts(subreddit, stocks, max_posts_per_stock=None):
                 break
 
             data = response.json()
-            posts = process_posts(data, stock)
+            posts = process_posts(data)
             stock_posts[stock].update(posts)
 
             after = data['data'].get('after')
@@ -69,10 +69,10 @@ def make_reddit_request(url, headers, params):
     return response
 
 # Process the posts retrieved from Reddit
-def process_posts(data, stock):
+def process_posts(data):
     posts = data['data'].get('children', [])
     stock_posts = []
-    
+
     for post in posts:
         post_data = post['data']
         title = post_data['title'].lower()
