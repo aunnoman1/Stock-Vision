@@ -49,9 +49,7 @@ class Command(BaseCommand):
                 continue
 
             sentiment_df['Date'] = pd.to_datetime(sentiment_df['time']).dt.date
-            
-            aggregated_posts_df = sentiment_df.groupby("Date", as_index=False)[["pos", "neg", "neu"]].mean()
-            
+
             average_sentiments = sentiment_df.groupby('Date')[['pos', 'neg', 'neu']].mean().reset_index()
             average_sentiments.columns = ['Date', 'average_pos', 'average_neg', 'average_neu']
 
@@ -75,25 +73,25 @@ class Command(BaseCommand):
             sentiment_ratios['neutral_ratio'] = sentiment_ratios['neutral'] / sentiment_ratios['total_posts']
 
             # Merge the average sentiments and sentiment ratios back into the original DataFrame
-            combined_sentiments = pd.merge(average_sentiments, sentiment_ratios, on='Date', how='inner')
+            combined_sentiments = pd.merge(average_sentiments, sentiment_ratios, on='Date', how='inner',validate='one_to_one')
 
 
-            combined_sentiments.drop(columns=['positive', 'negative', 'neutral', 'total_posts'], inplace=True)
+            combined_sentiments=combined_sentiments.drop(columns=['positive', 'negative', 'neutral', 'total_posts'])
 
 
 
             # Merge price and sentiment data
             price_data['Date'] = pd.to_datetime(price_data['date']).dt.date
-            merged_df = pd.merge(price_data, combined_sentiments, on='Date', how='left')
+            merged_df = pd.merge(price_data, combined_sentiments, on='Date', how='left',validate='one_to_one')
             #print(merged_df.shape)
-            merged_df.fillna(float(0.333333), inplace=True)
+            merged_df=merged_df.fillna(float(0.333333))
 
             #print(merged_df.info())
             merged_df['close'] = merged_df['close'].astype(float)
             # Compute additional features
             merged_df['LogReturn_Close'] = np.log(merged_df['close'] / merged_df['close'].shift(1))
             merged_df['LogReturn_Volume'] = np.log(merged_df['volume'] / merged_df['volume'].shift(1))
-            merged_df.dropna(inplace=True)
+            merged_df=merged_df.dropna()
             merged_df= merged_df.drop(columns=['close','volume','open','high','low'])
 
             feature_cols = [
