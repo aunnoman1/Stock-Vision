@@ -44,50 +44,72 @@ def fetch_reddit_posts(subreddit, stocks, max_posts_per_stock=None):
 
 def fetch_posts_for_stock(stock, base_url, headers, stock_posts, subreddit, max_posts_per_stock):
     after = None
-    while max_posts_per_stock is None or len(stock_posts[stock]) < max_posts_per_stock:
-        params = {
-            'q': stock,  # Search for the stock keyword
-            'sort': 'new',  # Sort by the newest posts
-            'limit': 700,  # Maximum allowed posts per request
-            'restrict_sr': True,  # Restrict to the subreddit
-            'after': after  # Pagination parameter
-        }
+    while should_continue_fetching(stock_posts, stock, max_posts_per_stock):
+        params = build_request_params(stock, after)
+        response = fetch_reddit_data(base_url, headers, params)
 
-        response = requests.get(base_url, headers=headers, params=params)
-        if response.status_code != 200:
-            print(f"Error {response.status_code} while fetching {stock} from {subreddit}")
+        if not response:
+            print(f"Error while fetching {stock} from {subreddit}")
             break
 
-        try:
-            data = response.json()
-        except ValueError as e:
-            print("Error parsing JSON:", e)
+        posts = extract_posts_from_response(response)
+        if not posts:
             break
 
-        if 'data' not in data or 'children' not in data['data']:
-            break
+        process_posts(posts, stock, stock_posts, max_posts_per_stock)
 
-        posts = data['data']['children']
-        if not posts:  
-            break
-
-        # Process each post and add to stock posts
-        for post in posts:
-            post_data = post['data']
-            title = post_data['title'].lower()
-            author = post_data.get('author', 'N/A')
-            created_utc = post_data.get('created_utc')
-            created_time = datetime.utcfromtimestamp(created_utc).strftime('%Y-%m-%d %H:%M:%S') if created_utc else "N/A"
-
-            stock_posts[stock].add((title, author, created_time))
-
-            if max_posts_per_stock and len(stock_posts[stock]) >= max_posts_per_stock:
-                break
-
-        # Update `after` for pagination
-        after = data['data'].get('after')
+        after = response['data'].get('after')
         if not after:
             break
+
+
+def build_request_params(stock, after):
+    return {
+        'q': stock,
+        'sort': 'new',
+        'limit': 700,
+        'restrict_sr': True,
+        'after': after
+    }
+
+
+def fetch_reddit_data(base_url, headers, params):
+    try:
+        response = requests.get(base_url, headers=headers, params=params)
+        if response.status_code == 200:
+            return response.json()
+        else:
+            print(f"Error {response.status_code}")
+    except ValueError as e:
+        print("Error parsing JSON:", e)
+    return None
+
+
+def extract_posts_from_response(data):
+    if 'data' in data and 'children' in data['data']:
+        return data['data']['children']
+    return []
+
+
+def process_posts(posts, stock, stock_posts, max_posts_per_stock):
+    for post in posts:
+        add_post_to_stock(post, stock, stock_posts)
+        if max_posts_per_stock and len(stock_posts[stock]) >= max_posts_per_stock:
+            break
+
+
+def add_post_to_stock(post, stock, stock_posts):
+    post_data = post['data']
+    title = post_data['title'].lower()
+    author = post_data.get('author', 'N/A')
+    created_utc = post_data.get('created_utc')
+    created_time = datetime.utcfromtimestamp(created_utc).strftime('%Y-%m-%d %H:%M:%S') if created_utc else "N/A"
+
+    stock_posts[stock].add((title, author, created_time))
+
+
+def should_continue_fetching(stock_posts, stock, max_posts_per_stock):
+    return max_posts_per_stock is None or len(stock_posts[stock]) < max_posts_per_stock
 
 # Function to perform sentiment analysis on text
 from decimal import Decimal
@@ -99,40 +121,53 @@ def analyze_sentiment(text):
     return sentiment_scores
 
 # Main function to aggregate stock posts from multiple subreddits
+from decimal import Decimal
+
 def get_aggregated_stock_posts(subreddits, stocks, max_posts_per_stock=None):
     for subreddit in subreddits:
         print(f"Fetching posts from r/{subreddit}")
         stock_posts = fetch_reddit_posts(subreddit, stocks, max_posts_per_stock)
         
         for i, stock in enumerate(stocks):
-            print(f"Processing stock: {TICKERS[i]}")
-            try:
-                stock_obj = Stock.objects.get(ticker=TICKERS[i])
-            except Stock.DoesNotExist:
-                print(f"Stock {TICKERS[i]} not found in the database.")
-                continue
+            process_stock_posts(stock_posts, stock, i)
 
-            for post in stock_posts[stock]:
-                title, author, created_time = post
-                sentiment_scores = analyze_sentiment(title)
-                
-                # Ensure we get valid Decimal values for the fields
-                sentiment = Decimal(str(sentiment_scores['compound']))  # Compound sentiment score
-                pos_sentiment = Decimal(str(sentiment_scores['pos']))  # Positive sentiment score
-                neg_sentiment = Decimal(str(sentiment_scores['neg']))  # Negative sentiment score
-                neu_sentiment = Decimal(str(sentiment_scores['neu']))  # Neutral sentiment score
-                
-                # Check if the values are valid (in case of any issues with the analysis)
-                if not isinstance(sentiment, Decimal):
-                    sentiment = Decimal(0.0)
-                if not isinstance(pos_sentiment, Decimal):
-                    pos_sentiment = Decimal(0.0)
-                if not isinstance(neg_sentiment, Decimal):
-                    neg_sentiment = Decimal(0.0)
-                if not isinstance(neu_sentiment, Decimal):
-                    neu_sentiment = Decimal(0.0)
-                
-                save_post(stock_obj, author, created_time, sentiment, pos_sentiment, neg_sentiment, neu_sentiment, title)
+
+def process_stock_posts(stock_posts, stock, index):
+    print(f"Processing stock: {TICKERS[index]}")
+    stock_obj = get_stock_object(TICKERS[index])
+    if not stock_obj:
+        print(f"Stock {TICKERS[index]} not found in the database.")
+        return
+
+    for post in stock_posts[stock]:
+        title, author, created_time = post
+        sentiment_scores = analyze_sentiment(title)
+        sentiment_data = extract_sentiment_scores(sentiment_scores)
+
+        save_post(stock_obj, author, created_time, *sentiment_data, title)
+
+
+def get_stock_object(ticker):
+    try:
+        return Stock.objects.get(ticker=ticker)
+    except Stock.DoesNotExist:
+        return None
+
+
+def extract_sentiment_scores(sentiment_scores):
+    sentiment = safe_decimal_conversion(sentiment_scores['compound'])
+    pos_sentiment = safe_decimal_conversion(sentiment_scores['pos'])
+    neg_sentiment = safe_decimal_conversion(sentiment_scores['neg'])
+    neu_sentiment = safe_decimal_conversion(sentiment_scores['neu'])
+
+    return sentiment, pos_sentiment, neg_sentiment, neu_sentiment
+
+
+def safe_decimal_conversion(value):
+    try:
+        return Decimal(str(value))
+    except (ValueError, TypeError, InvalidOperation):
+        return Decimal(0.0)
 
 # Function to save the post in the database, including the sentiment fields
 def save_post(stock_obj, author, created_time, sentiment, pos_sentiment, neg_sentiment, neu_sentiment, title):
