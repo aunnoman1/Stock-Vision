@@ -6,9 +6,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Search Results</title>
-    <link rel="stylesheet" href="{% static 'styles.css' %}">
     <style>
-        /* Global Styles */
         body {
             font-family: 'Roboto', sans-serif;
             margin: 0;
@@ -182,17 +180,12 @@
 
     <!-- Main Content -->
     <div class="container">
-        <h1>Search Results</h1>
+        <h1>Results for: <strong>{{ query }}</strong></h1>
 
-        <!-- Display the search query -->
-        <p>Results for: <strong>{{ query }}</strong></p>
-
-        <!-- Check if any stocks are returned -->
         {% if stocks %}
-            <!-- Scrollable results container -->
+            <!-- Scroller-->
             <div class="results-list">
                 <ul>
-                    <!-- Loop through the stocks and display them as links -->
                     {% for stock in stocks %}
                         <li>
                             <a href="{% url 'stock_detail' stock.ticker %}">
@@ -210,7 +203,7 @@
                     <a href="?page={{ page_obj.previous_page_number }}">Previous</a>
                 {% endif %}
 
-                <span>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+                <span>{{ page_obj.number }} {{ page_obj.paginator.num_pages }}</span>
 
                 {% if page_obj.has_next %}
                     <a href="?page={{ page_obj.next_page_number }}">Next</a>
@@ -218,11 +211,9 @@
                 {% endif %}
             </div>
         {% else %}
-            <!-- Message when no results are found -->
             <p>No stocks found for your search.</p>
         {% endif %}
 
-        <!-- Add a button to return to the home page -->
         <a href="{% url 'homepage' %}" class="btn">Home</a>
     </div>
 </body>

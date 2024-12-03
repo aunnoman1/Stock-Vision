@@ -213,6 +213,7 @@
         <table class="price-table">
             <thead>
                 <tr>
+                    <th>Current Price</th>
                     <th>Predicted Price</th>
                     <th>Highest Price (Last 6 Months)</th>
                     <th>Lowest Price (Last 6 Months)</th>
@@ -220,6 +221,7 @@
             </thead>
             <tbody>
                 <tr>
+                    <td>${{ latest_price.close }}</td>
                     <td>${{ stock_data.prediction }}</td>
                     <td>${{ max_price }}</td>
                     <td>${{ min_price }}</td>
