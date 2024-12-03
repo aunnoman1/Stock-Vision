@@ -260,13 +260,7 @@
         <script>
             const defaultTimeSpan = '6m';  
         // Define the initial chart data (directly from template context)
-            const chartData = {
-                dates: {{ chart_data.dates|safe }},
-                close_prices: {{ chart_data.close_prices|safe }},
-                open_prices: {{ chart_data.open_prices|safe }},
-                high_prices: {{ chart_data.high_prices|safe }},
-                low_prices: {{ chart_data.low_prices|safe }}
-            };
+        const chartData = JSON.parse('{{ chart_data_json|escapejs }}');
 
             // Function to filter out weekends (Saturday=5, Sunday=6)
             function filterWeekends(data) {
