@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 from django.core.management.base import BaseCommand
 from django.db.models import Avg
-from sv.models import Stock, Price, Post  # Replace 'myapp' with the name of your app
+from sv.models import Stock, Price, Post
 import tensorflow as tf
 import joblib
 import yfinance as yf

@@ -134,7 +134,13 @@
                     <td>{{ entry.latest_price.low }}</td>
                     <td>{{ entry.latest_price.high }}</td>
                     <td>{{ entry.latest_price.close }}</td>
-                    <td>{{ entry.latest_price.volume|floatformat:2 }}</td>
+                    <td>
+                        {% if entry.latest_price.volume %}
+                          {{ (entry.latest_price.volume|divisibleby:1000000)|floatformat:2 }}
+                        {% else %}
+                          N/A
+                        {% endif %}
+                      </td>
                     {% else %}
                     <td colspan="4">No price data available</td>
                     {% endif %}
