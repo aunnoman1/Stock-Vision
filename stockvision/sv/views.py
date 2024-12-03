@@ -14,6 +14,8 @@ from .models import Stock,Price
 from django.db.models import Q
 import logging
 from django.views.decorators.csrf import csrf_exempt
+from django import forms
+from .models import Request
 
 logger = logging.getLogger(__name__)
 
@@ -21,9 +23,7 @@ from django.shortcuts import render
 from .models import Price
 
 def homepage_view(request):
-    # Get the latest date from the Price table
     latest_date = Price.objects.latest('date').date
-    # Get stocks with the highest volume on the latest date
     trending_stocks = Price.objects.filter(date=latest_date).order_by('-volume')[:5]
     context = {
         'trending_stocks': trending_stocks,
@@ -33,8 +33,6 @@ def homepage_view(request):
 def stock_detail(request, symbol):
     stock = get_object_or_404(Stock, ticker=symbol)
     latest_price = stock.prices.order_by('-date').first()
-    
-    # Handle time span for price data
     time_span = request.GET.get('time_span', '6m')
 
     if time_span == '1w':
@@ -63,8 +61,6 @@ def stock_detail(request, symbol):
         'high_prices': [float(price.high) for price in stock_prices],
         'low_prices': [float(price.low) for price in stock_prices],
     }
-
-    # Retrieve the 5 most recent posts for the stock
     recent_posts = stock.posts.all().order_by('-time')[:5]
 
     return render(request, 'stock_detail.html', {
@@ -273,7 +269,23 @@ def sector_stocks(request):
             'latest_price': latest_price,
         })
 
+
+    
+
     return render(request, 'sector_stocks.html', {
         'sector': selected_sector,
         'stocks_with_prices': stocks_with_prices
     })
+
+
+def request_stock(request):
+    if request.method == 'POST':
+        req_name = request.POST.get('req_name')
+        ticker = request.POST.get('ticker')
+        new_request = Request(req_name=req_name, ticker=ticker, user=request.user)
+        new_request.save()
+        messages.success(request, 'Your stock request has been submitted.')
+
+        return redirect('request_stock')  
+    
+    return render(request, 'request_stock.html')

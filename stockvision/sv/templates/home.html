@@ -166,7 +166,7 @@
     <div class="sidebar">
         <a href="{% if user.is_authenticated %}{% url 'userdetails' %}{% else %}{% url 'login' %}{% endif %}" class="button">Profile</a>
         <a href="{% if user.is_authenticated %}{% url 'userwatchlist' %}{% else %}{% url 'login' %}{% endif %}" class="button">Watchlist</a>
-        <a class="button">Request Stock</a>
+        <a href="{% url 'request_stock' %}" class="button">Request Stock</a>
         <a href="{% url 'compare_selector' %}" class="button">Compare Stocks</a>
         <a href="{% url 'select_sector' %}" class="button">View by Sector</a>
         <a class="button">About Us</a>
