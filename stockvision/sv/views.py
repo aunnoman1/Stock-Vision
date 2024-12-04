@@ -210,10 +210,13 @@ def homepage_view(request):
 def compare_stocks(request):
     stock = get_object_or_404(Stock, ticker=request.GET.get('symbol'))
     compare_stock = get_object_or_404(Stock, ticker=request.GET.get('compare-symbol'))
-    latest_price = stock.prices.order_by('-date').first()
-    stock_prices = stock.prices.order_by('date')[:100]
 
-    if stock_prices.exists():
+    stock_prices_queryset = stock.prices.order_by('-date')[:100]
+    stock_prices = list(stock_prices_queryset)[::-1]  
+
+    latest_price = stock_prices[-1] if stock_prices else None  
+
+    if stock_prices:
         min_price = min(price.low for price in stock_prices)
         max_price = max(price.high for price in stock_prices)
     else:
@@ -228,13 +231,16 @@ def compare_stocks(request):
     }
 
 
-    
-    compare_latest_price = compare_stock.prices.order_by('-date').first()
-    compare_stock_prices = compare_stock.prices.order_by('date')[:100]
+    compare_stock_prices_queryset = compare_stock.prices.order_by('-date')[:100]
+    compare_stock_prices = list(compare_stock_prices_queryset)[::-1]
 
-    if compare_stock_prices.exists():
+    compare_latest_price = compare_stock_prices[-1] if compare_stock_prices else None
+
+    if compare_stock_prices:
         compare_min_price = min(price.low for price in compare_stock_prices)
         compare_max_price = max(price.high for price in compare_stock_prices)
+    else:
+        compare_min_price = compare_max_price = None
 
     compare_chart_data = {
         'dates': [price.date.strftime('%Y-%m-%d') for price in compare_stock_prices],

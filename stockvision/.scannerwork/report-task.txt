@@ -1,0 +1,6 @@
+projectKey=SV5
+serverUrl=http://localhost:9000
+serverVersion=24.12.0.100206
+dashboardUrl=http://localhost:9000/dashboard?id=SV5
+ceTaskId=46844e79-24a2-4f36-96e3-2e76850824e8
+ceTaskUrl=http://localhost:9000/api/ce/task?id=46844e79-24a2-4f36-96e3-2e76850824e8

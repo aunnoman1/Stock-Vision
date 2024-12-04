@@ -107,103 +107,6 @@
         <a href="#recent-posts">Go to Posts</a>
         <a href="#time-span-buttons">Go to Graph</a>
     </div>
-
-    <!-- Watchlist Buttons (Top Right) -->
-<!-- Watchlist Buttons (Top Right) -->
-{% if user.is_authenticated %}
-<div class="watchlist-buttons" style="position: fixed; top: 20px; right: 20px; text-align: center;">
-    <button id="add-to-watchlist" data-url="{% url 'add_to_watchlist' stock_data.id %}" 
-            style="background-color: #4CAF50; color: white; border: none; padding: 10px 20px; border-radius: 5px; margin-bottom: 10px;">
-        Add to Watchlist
-    </button>
-    
-    <button id="remove-from-watchlist" data-url="{% url 'remove_from_watchlist' stock_data.id %}" 
-            style="background-color: #f44336; color: white; border: none; padding: 10px 20px; border-radius: 5px;">
-        Remove from Watchlist
-    </button>
-</div>
-{% endif %}
-
-    <!-- watchlist handling-->
-<div id="watchlist-popup" style="display:none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: white; padding: 20px; border: 1px solid black; border-radius: 10px;">
-    <p id="popup-message" style="font-size: 16px; color: white;"></p>
-    <button onclick="document.getElementById('watchlist-popup').style.display='none'">Close</button>
-</div>
-
-<script>
-    document.addEventListener("DOMContentLoaded", () => {
-        const addButton = document.querySelector("#add-to-watchlist");
-        if (addButton) {
-            addButton.addEventListener("click", (event) => {
-                event.preventDefault();
-                const url = addButton.getAttribute("data-url");
-
-                fetch(url, {
-                    method: "POST",
-                    headers: {
-                        "X-CSRFToken": "{{ csrf_token }}",
-                        "Content-Type": "application/json"
-                    }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    const popupMessage = document.getElementById("popup-message");
-                    const popup = document.getElementById("watchlist-popup");
-                    
-                    if (data.message) {
-                        popupMessage.textContent = data.message;
-                        popup.style.display = "block";
-                        popup.style.backgroundColor = "green"; 
-                    } else if (data.error) {
-                        popupMessage.textContent = data.error;
-                        popup.style.display = "block";
-                        popup.style.backgroundColor = "red"; 
-                    }
-                })
-                .catch(error => {
-                    console.error("Error:", error);
-                    alert("An error occurred while adding to the watchlist.");
-                });
-            });
-        }
-
-        // Remove from Watchlist Button
-        const removeButton = document.querySelector("#remove-from-watchlist");
-        if (removeButton) {
-            removeButton.addEventListener("click", (event) => {
-                event.preventDefault();
-                const url = removeButton.getAttribute("data-url");
-
-                fetch(url, {
-                    method: "POST",
-                    headers: {
-                        "X-CSRFToken": "{{ csrf_token }}",
-                        "Content-Type": "application/json"
-                    }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    const popupMessage = document.getElementById("popup-message");
-                    const popup = document.getElementById("watchlist-popup");
-
-                    if (data.message) {
-                        popupMessage.textContent = data.message;
-                        popup.style.display = "block";
-                        popup.style.backgroundColor = "red"; 
-                    } else if (data.error) {
-                        popupMessage.textContent = data.error;
-                        popup.style.display = "block";
-                        popup.style.backgroundColor = "red"; 
-                    }
-                })
-                .catch(error => {
-                    console.error("Error:", error);
-                    alert("An error occurred while removing from the watchlist.");
-                });
-            });
-        }
-    });
-</script>
     
     <!-- Basic Details -->
     <div class="container">
@@ -368,7 +271,103 @@
         plotChart(filteredData, timeSpan);
     }             
         </script>             
-        
+    
+    <!-- Watchlist Buttons (Top Right) -->
+{% if user.is_authenticated %}
+<div class="watchlist-buttons" style="position: fixed; top: 20px; right: 20px; text-align: center;">
+    <button id="add-to-watchlist" data-url="{% url 'add_to_watchlist' stock_data.id %}" 
+            style="background-color: #4CAF50; color: white; border: none; padding: 10px 20px; border-radius: 5px; margin-bottom: 10px;">
+        Add to Watchlist
+    </button>
+    
+    <button id="remove-from-watchlist" data-url="{% url 'remove_from_watchlist' stock_data.id %}" 
+            style="background-color: #f44336; color: white; border: none; padding: 10px 20px; border-radius: 5px;">
+        Remove from Watchlist
+    </button>
+</div>
+{% endif %}
+    
+            <!-- watchlist handling-->
+<div id="watchlist-popup" style="display:none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: white; padding: 20px; border: 1px solid black; border-radius: 10px;">
+    <p id="popup-message" style="font-size: 16px; color: white;"></p>
+    <button onclick="document.getElementById('watchlist-popup').style.display='none'">Close</button>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const addButton = document.querySelector("#add-to-watchlist");
+        if (addButton) {
+            addButton.addEventListener("click", (event) => {
+                event.preventDefault();
+                const url = addButton.getAttribute("data-url");
+
+                fetch(url, {
+                    method: "POST",
+                    headers: {
+                        "X-CSRFToken": "{{ csrf_token }}",
+                        "Content-Type": "application/json"
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    const popupMessage = document.getElementById("popup-message");
+                    const popup = document.getElementById("watchlist-popup");
+                    
+                    if (data.message) {
+                        popupMessage.textContent = data.message;
+                        popup.style.display = "block";
+                        popup.style.backgroundColor = "green"; 
+                    } else if (data.error) {
+                        popupMessage.textContent = data.error;
+                        popup.style.display = "block";
+                        popup.style.backgroundColor = "red"; 
+                    }
+                })
+                .catch(error => {
+                    console.error("Error:", error);
+                    alert("An error occurred while adding to the watchlist.");
+                });
+            });
+        }
+
+        // Remove from Watchlist Button
+        const removeButton = document.querySelector("#remove-from-watchlist");
+        if (removeButton) {
+            removeButton.addEventListener("click", (event) => {
+                event.preventDefault();
+                const url = removeButton.getAttribute("data-url");
+
+                fetch(url, {
+                    method: "POST",
+                    headers: {
+                        "X-CSRFToken": "{{ csrf_token }}",
+                        "Content-Type": "application/json"
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    const popupMessage = document.getElementById("popup-message");
+                    const popup = document.getElementById("watchlist-popup");
+
+                    if (data.message) {
+                        popupMessage.textContent = data.message;
+                        popup.style.display = "block";
+                        popup.style.backgroundColor = "red"; 
+                    } else if (data.error) {
+                        popupMessage.textContent = data.error;
+                        popup.style.display = "block";
+                        popup.style.backgroundColor = "red"; 
+                    }
+                })
+                .catch(error => {
+                    console.error("Error:", error);
+                    alert("An error occurred while removing from the watchlist.");
+                });
+            });
+        }
+    });
+</script>
+
     </div>
 </body>
 </html>
